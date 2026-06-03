@@ -1,0 +1,55 @@
+{
+  "mode": {
+    "dryRun": true,
+    "tradingEnabled": false,
+    "confirmLiveOrder": false
+  },
+  "strategy": {
+    "activeStrategy": "starter_voo",
+    "watchSymbols": [
+      "VOO",
+      "VTI",
+      "SPY",
+      "QQQ"
+    ],
+    "allowedSymbols": [
+      "AAOI"
+    ],
+    "blockedSymbols": [],
+    "allowBuys": true,
+    "allowSells": false,
+    "allowOptions": false,
+    "allowCrypto": false,
+    "fixedDcaAmount": 1,
+    "rebalanceTargets": {},
+    "manualSignal": null
+  },
+  "risk": {
+    "maxDollarsPerTrade": 1,
+    "maxTradesPerDay": 1,
+    "maxPortfolioAllocationPercentPerSymbol": 20,
+    "maxCashUsagePercentPerRun": 20,
+    "minBuyingPowerAfterTrade": 1,
+    "maxDailySpend": 5,
+    "maxDailySellAmount": 0,
+    "cooldownMinutesAfterTrade": 30,
+    "requireReviewBeforePlace": true,
+    "requireManualConfirmationForLive": true
+  },
+  "modelTuning": {
+    "riskTolerance": 0.15,
+    "cashReservePercent": 25,
+    "dipBuyThresholdPercent": 1.5,
+    "takeProfitPercent": 8,
+    "stopLossPercent": 5,
+    "rebalanceThresholdPercent": 10,
+    "positionSizingMode": "fixed_dollars",
+    "confidenceThreshold": 0.75,
+    "maxSignalAgeMinutes": 30
+  },
+  "ui": {
+    "refreshIntervalSeconds": 60,
+    "theme": "system",
+    "compactMode": true
+  }
+}

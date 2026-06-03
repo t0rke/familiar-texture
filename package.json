@@ -5,8 +5,12 @@
   "main": "src/runOrder.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon src/runOrder.js",
+    "dev": "vite --host 127.0.0.1",
+    "agent:dev": "nodemon src/runOrder.js",
     "discover": "node src/scripts/discoverTools.js",
+    "build": "vite build",
+    "lint": "node scripts/lint.mjs",
+    "preview": "vite preview --host 127.0.0.1",
     "start": "node src/runOrder.js",
     "order": "node src/runOrder.js",
     "accounts": "node src/scripts/listAccounts.js",
@@ -18,8 +22,13 @@
   "type": "module",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.29.0",
+    "@vitejs/plugin-react": "^6.0.2",
     "dotenv": "^17.4.2",
-    "open": "^11.0.0"
+    "lucide-react": "^1.17.0",
+    "open": "^11.0.0",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
+    "vite": "^8.0.16"
   },
   "devDependencies": {
     "nodemon": "^3.1.14"
