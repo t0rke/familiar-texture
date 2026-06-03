@@ -5,13 +5,16 @@ import {
   BarChart3,
   CheckCircle2,
   Clock3,
+  Code2,
   DollarSign,
   Eye,
   Filter,
   Gauge,
+  Globe2,
   Layers,
   ListChecks,
   Lock,
+  Palette,
   Play,
   Power,
   RefreshCw,
@@ -321,6 +324,24 @@ const ROUTES = [
     icon: Power,
     label: "Execution",
     path: "/execution",
+  },
+  {
+    description: "Candle freshness, provider readiness, and AAOI signal telemetry.",
+    icon: Globe2,
+    label: "Market Data",
+    path: "/market-data",
+  },
+  {
+    description: "Developer console for local APIs, MCP tools, scripts, and safety notes.",
+    icon: Code2,
+    label: "API",
+    path: "/api",
+  },
+  {
+    description: "Brand tokens, typography, layout, components, and motion rules.",
+    icon: Palette,
+    label: "Design System",
+    path: "/design-system",
   },
   {
     description: "Application preferences, config health, and persistence controls.",
@@ -742,6 +763,20 @@ function App() {
           <ExecutionPage {...controlProps} visibleSections={["execution", "preview"]} />
         ) : null}
 
+        {route === "/market-data" ? (
+          <MarketDataPage settings={draftSettings} status={status} events={events} />
+        ) : null}
+
+        {route === "/api" ? (
+          <ApiDocsPage
+            health={settingsPayload?.health}
+            status={status}
+            settings={draftSettings}
+          />
+        ) : null}
+
+        {route === "/design-system" ? <DesignSystemPage /> : null}
+
         {route === "/settings" ? (
           <SettingsPage
             {...controlProps}
@@ -785,6 +820,7 @@ function AppShell({
       <aside className="shell-rail">
         <div className="brand-mark">
           <span>FT</span>
+          <strong>familiar</strong>
         </div>
         <LiquidNav currentPath={currentRoute.path} onNavigate={navigate} routes={routes} />
       </aside>
@@ -1114,6 +1150,323 @@ function ExecutionPage(props) {
       <StrategyControlCenter {...props} headingTitle="Execution Controls" />
       <OrderReviewCard />
     </>
+  );
+}
+
+function MarketDataPage({ events, settings, status }) {
+  const marketEvents = events.filter((event) => event.type === "MARKET_DATA_CANDLES");
+  const latest = marketEvents.at(-1)?.marketData;
+  const primary = latest?.primary;
+  const confirmation = latest?.confirmation;
+
+  return (
+    <>
+      <PageHeader
+        title="Market Data"
+        subtitle="AAOI candle readiness, provider fallbacks, freshness checks, and signal ingredients."
+      />
+      <section className="market-hero system-hero">
+        <div>
+          <p className="eyebrow">aaoi signal plane</p>
+          <h2>Fresh candles before conviction.</h2>
+          <p>
+            Live placement stays blocked unless the backend sees fresh live-safe candle data,
+            risk limits pass, kill switch is clear, and broker review has run.
+          </p>
+        </div>
+        <div className="signal-orb" aria-hidden="true">
+          <span>AAOI</span>
+        </div>
+      </section>
+      <section className="three-column-grid">
+        <SpecCard
+          title="Primary Feed"
+          value={primary?.provider ?? "No feed"}
+          detail={`${primary?.count ?? 0} candles`}
+          tone={primary?.freshness?.liveSafe ? "success" : "warning"}
+        />
+        <SpecCard
+          title="Freshness"
+          value={primary?.freshness?.liveSafe ? "Live-safe" : "Holding"}
+          detail={primary?.freshness?.reason ?? "No candle run yet"}
+          tone={primary?.freshness?.liveSafe ? "success" : "danger"}
+        />
+        <SpecCard
+          title="Market Confirm"
+          value={settings?.marketData?.marketConfirmationSymbol ?? "QQQ"}
+          detail={`${confirmation?.count ?? 0} confirmation candles`}
+          tone="info"
+        />
+      </section>
+      <section className="two-column-grid docs-grid">
+        <section className="section-card dark-doc-panel">
+          <div className="section-heading">
+            <span>Indicator stack</span>
+            <strong>AAOI dip reversal</strong>
+          </div>
+          <div className="indicator-board">
+            {["VWAP reclaim", "RSI recovery", "ATR stop", "Volume absorption", "Market confirm"].map(
+              (item, index) => (
+                <div className="indicator-row" key={item}>
+                  <span>{String(index + 1).padStart(2, "0")}</span>
+                  <strong>{item}</strong>
+                  <small>{index < 3 ? "Backend scored" : "Required context"}</small>
+                </div>
+              )
+            )}
+          </div>
+        </section>
+        <section className="section-card docs-panel">
+          <div className="section-heading">
+            <span>Provider policy</span>
+            <strong>{settings?.marketData?.providerPriority?.join(" -> ") ?? "Not loaded"}</strong>
+          </div>
+          <div className="token-list">
+            <TokenLine label="Max candle age" value={`${settings?.marketData?.maxCandleAgeSeconds ?? 90}s`} />
+            <TokenLine label="Lookback" value={`${settings?.marketData?.lookbackMinutes ?? 180}m`} />
+            <TokenLine label="Experimental scraping" value={settings?.marketData?.experimentalScrapingEnabled ? "Enabled" : "Disabled"} />
+            <TokenLine label="Runtime MCP" value={status.mcpConfigured ? "Configured" : "Missing"} />
+          </div>
+        </section>
+      </section>
+    </>
+  );
+}
+
+const apiGroups = [
+  {
+    title: "Settings",
+    endpoints: [
+      ["GET", "/api/settings", "Read settings, defaults, validation, and safe config health.", "Read-only"],
+      ["PATCH", "/api/settings", "Persist validated settings. Live mode requires typed confirmation.", "Writes settings"],
+      ["POST", "/api/settings/reset", "Reset safe defaults and audit the reset.", "Writes settings"],
+    ],
+  },
+  {
+    title: "Execution",
+    endpoints: [
+      ["POST", "/api/run-strategy", "Start the strategy runner process.", "Trading-sensitive"],
+      ["POST", "/api/kill-switch/enable", "Arm backend kill switch immediately.", "Safety"],
+      ["POST", "/api/kill-switch/disable", "Clear kill switch after operator intent.", "Requires care"],
+    ],
+  },
+  {
+    title: "Account / Ledger",
+    endpoints: [
+      ["GET", "/api/account", "Read cached masked account snapshot.", "Read-only"],
+      ["POST", "/api/account/sync", "Pull portfolio, positions, quotes, and recent orders from MCP.", "Broker read"],
+      ["GET", "/api/ledger", "Read redacted JSONL audit trail and runtime status.", "Read-only"],
+    ],
+  },
+  {
+    title: "Planned DB APIs",
+    endpoints: [
+      ["GET", "/api/candles?symbol=AAOI&interval=1", "Expose persisted candle rows.", "Read-only"],
+      ["GET", "/api/risk-profile", "Read active Prisma risk profile.", "Read-only"],
+      ["PATCH", "/api/symbol-lists/:type", "Persist watch/allow/block lists.", "Writes settings"],
+    ],
+  },
+];
+
+function ApiDocsPage({ health, settings, status }) {
+  const scripts = [
+    "npm run dev",
+    "npm run build",
+    "npm run order",
+    "npm run accounts",
+    "npm run orders",
+    "npm run discover",
+    "npm run db:generate",
+    "npm run db:migrate",
+    "npm run db:seed",
+    "npm run db:studio",
+  ];
+
+  return (
+    <>
+      <PageHeader
+        title="API Console"
+        subtitle="Local backend routes, Robinhood MCP tools, scripts, and trading-sensitive boundaries."
+      />
+      <section className="api-console two-column-grid">
+        <aside className="endpoint-index">
+          <p className="eyebrow">base url</p>
+          <strong>http://127.0.0.1:5173</strong>
+          <TokenLine label="Database" value={health?.source ?? "database"} />
+          <TokenLine label="MCP" value={status.mcpConfigured ? "Configured" : "Missing"} />
+          <TokenLine label="Strategy" value={settings?.strategy?.activeStrategy ?? "Not loaded"} />
+        </aside>
+        <section className="endpoint-stack">
+          {apiGroups.map((group) => (
+            <article className="endpoint-group" key={group.title}>
+              <div className="section-heading">
+                <span>{group.title}</span>
+                <strong>{group.endpoints.length} endpoints</strong>
+              </div>
+              {group.endpoints.map(([method, path, description, badge]) => (
+                <EndpointCard
+                  badge={badge}
+                  description={description}
+                  key={`${method}-${path}`}
+                  method={method}
+                  path={path}
+                />
+              ))}
+            </article>
+          ))}
+        </section>
+      </section>
+      <section className="docs-grid two-column-grid">
+        <section className="section-card docs-panel">
+          <div className="section-heading">
+            <span>MCP tools</span>
+            <strong>Robinhood adapter</strong>
+          </div>
+          <div className="chip-gallery">
+            {[
+              "get_accounts",
+              "get_portfolio",
+              "get_equity_positions",
+              "get_equity_quotes",
+              "get_equity_orders",
+              "get_equity_tradability",
+              "review_equity_order",
+              "place_equity_order",
+              "cancel_equity_order",
+              "search",
+            ].map((tool) => (
+              <span className="system-chip" key={tool}>{tool}</span>
+            ))}
+          </div>
+        </section>
+        <section className="section-card dark-doc-panel">
+          <div className="section-heading">
+            <span>developer scripts</span>
+            <strong>local commands</strong>
+          </div>
+          <pre className="code-block">{scripts.join("\n")}</pre>
+        </section>
+      </section>
+    </>
+  );
+}
+
+const colorTokens = [
+  ["Primary Ink", "--color-ink", "#080a0f", "Primary text and hard labels"],
+  ["Soft Background", "--color-bg", "#f4f5f2", "Application canvas"],
+  ["Glass Surface", "--color-glass", "rgba(255,255,255,.78)", "Panels and nav"],
+  ["Electric Lime", "--color-accent", "#dfff61", "Active signal accent"],
+  ["Info Blue", "--color-info", "#2f73ff", "Links and technical emphasis"],
+  ["Trading Green", "--color-success", "#10a967", "Safe/pass states"],
+  ["Warning Amber", "--color-warning", "#d97706", "Review states"],
+  ["Danger Red", "--color-danger", "#ff4f43", "Live/danger states"],
+];
+
+function DesignSystemPage() {
+  return (
+    <>
+      <PageHeader
+        title="Design System"
+        subtitle="Tokens, typography, surfaces, components, and motion rules for Familiar Texture."
+      />
+      <section className="system-hero">
+        <div>
+          <p className="eyebrow">figma board / trading cockpit</p>
+          <h2>One product language.</h2>
+          <p>
+            Premium design software energy, institutional trading clarity, and explicit safety
+            states live in the same reusable visual system.
+          </p>
+        </div>
+        <div className="system-wordmark">FT.</div>
+      </section>
+      <section className="design-board">
+        <div className="board-header">
+          <span>Colors</span>
+          <strong>Core tokens</strong>
+        </div>
+        <div className="swatch-grid">
+          {colorTokens.map(([name, token, value, note]) => (
+            <TokenSwatch key={token} name={name} note={note} token={token} value={value} />
+          ))}
+        </div>
+      </section>
+      <section className="two-column-grid docs-grid">
+        <section className="section-card docs-panel typography-specimen">
+          <p className="eyebrow">typography</p>
+          <h3>Familiar Texture</h3>
+          <strong>AAOI Dip Reversal</strong>
+          <span>$1,240.52 · VWAP · RSI · MACD</span>
+          <p>ABCDEFGHIJKLMNOPQRSTUVWXYZ / 0123456789</p>
+        </section>
+        <section className="section-card dark-doc-panel">
+          <div className="section-heading">
+            <span>components</span>
+            <strong>shared primitives</strong>
+          </div>
+          <div className="component-gallery">
+            <button className="primary-button light">Primary</button>
+            <button className="secondary-button">Secondary</button>
+            <span className="run-status dry">Dry run</span>
+            <span className="system-chip lime">AAOI</span>
+            <MiniStat label="Max Trade" value="$1.00" />
+          </div>
+        </section>
+      </section>
+      <section className="design-board">
+        <div className="board-header">
+          <span>Layout / Motion</span>
+          <strong>Rules</strong>
+        </div>
+        <div className="three-column-grid">
+          <SpecCard title="Grid" value="12 / 8px" detail="Tokenized rhythm across pages" tone="info" />
+          <SpecCard title="Radius" value="8px" detail="Crisp product cards and panels" tone="success" />
+          <SpecCard title="Motion" value="Reduced safe" detail="LiquidNav honors reduced motion" tone="warning" />
+        </div>
+      </section>
+    </>
+  );
+}
+
+function SpecCard({ detail, title, tone = "info", value }) {
+  return (
+    <article className={`spec-card ${tone}`}>
+      <span>{title}</span>
+      <strong>{value}</strong>
+      <small>{detail}</small>
+    </article>
+  );
+}
+
+function EndpointCard({ badge, description, method, path }) {
+  return (
+    <div className="endpoint-card">
+      <span className={`method-badge ${method.toLowerCase()}`}>{method}</span>
+      <code>{path}</code>
+      <p>{description}</p>
+      <strong>{badge}</strong>
+    </div>
+  );
+}
+
+function TokenSwatch({ name, note, token, value }) {
+  return (
+    <article className="token-swatch">
+      <span className="swatch-preview" style={{ background: `var(${token})` }} />
+      <strong>{name}</strong>
+      <code>{token}</code>
+      <small>{value}</small>
+      <p>{note}</p>
+    </article>
+  );
+}
+
+function TokenLine({ label, value }) {
+  return (
+    <div className="token-line">
+      <span>{label}</span>
+      <strong>{value}</strong>
+    </div>
   );
 }
 

@@ -1,0 +1,29 @@
+.glass-surface {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.88), rgba(246, 248, 252, 0.68)),
+    var(--color-glass);
+  box-shadow: var(--shadow-glass);
+  backdrop-filter: var(--blur-glass);
+}
+
+.dark-surface {
+  background:
+    linear-gradient(180deg, rgba(27, 31, 41, 0.98), rgba(8, 10, 15, 0.99)),
+    var(--color-surface-dark);
+  box-shadow: var(--shadow-lg);
+  color: #ffffff;
+}
+
+.accent-underline {
+  position: relative;
+}
+
+.accent-underline::after {
+  position: absolute;
+  right: 0;
+  bottom: -8px;
+  left: 0;
+  height: 2px;
+  background: repeating-linear-gradient(90deg, var(--color-accent) 0 8px, transparent 8px 16px);
+  content: "";
+}

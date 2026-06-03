@@ -14,7 +14,12 @@
     "start": "node src/runOrder.js",
     "order": "node src/runOrder.js",
     "accounts": "node src/scripts/listAccounts.js",
-    "orders": "node src/scripts/listOrders.js"
+    "orders": "node src/scripts/listOrders.js",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate dev",
+    "db:studio": "prisma studio",
+    "db:seed": "prisma db seed",
+    "db:import-legacy": "node src/scripts/importLegacyData.js"
   },
   "keywords": [],
   "author": "",
@@ -22,6 +27,7 @@
   "type": "module",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.29.0",
+    "@prisma/client": "^6.19.3",
     "@vitejs/plugin-react": "^6.0.2",
     "dotenv": "^17.4.2",
     "lucide-react": "^1.17.0",
@@ -31,6 +37,7 @@
     "vite": "^8.0.16"
   },
   "devDependencies": {
-    "nodemon": "^3.1.14"
+    "nodemon": "^3.1.14",
+    "prisma": "^6.19.3"
   }
 }

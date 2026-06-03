@@ -1,16 +1,28 @@
 {
+  "marketData": {
+    "experimentalScrapingEnabled": false,
+    "interval": "1",
+    "lookbackMinutes": 180,
+    "marketConfirmationSymbol": "QQQ",
+    "maxCandleAgeSeconds": 90,
+    "maxQuoteMismatchPercent": 0.75,
+    "providerPriority": [
+      "finnhub",
+      "twelveData",
+      "robinhoodQuoteOnly"
+    ]
+  },
   "mode": {
     "dryRun": true,
     "tradingEnabled": false,
     "confirmLiveOrder": false
   },
   "strategy": {
-    "activeStrategy": "starter_voo",
+    "activeStrategy": "aaoi_dip_reversal",
     "watchSymbols": [
-      "VOO",
-      "VTI",
-      "SPY",
-      "QQQ"
+      "AAOI",
+      "QQQ",
+      "SPY"
     ],
     "allowedSymbols": [
       "AAOI"
@@ -47,9 +59,30 @@
     "confidenceThreshold": 0.75,
     "maxSignalAgeMinutes": 30
   },
+  "strategyParams": {
+    "aaoi_dip_reversal": {
+      "atrPeriod": 14,
+      "atrStopMultiplier": 1,
+      "defaultDollars": 1,
+      "hardMaxLossPercent": 1,
+      "macdFast": 12,
+      "macdSignal": 9,
+      "macdSlow": 26,
+      "minCandles": 35,
+      "minRewardRisk": 1.5,
+      "minScoreToTrade": 7,
+      "rsiOversold": 30,
+      "rsiPeriod": 14,
+      "rsiRecovery": 35,
+      "stopBufferPercent": 0.05,
+      "symbol": "AAOI",
+      "targetMode": "vwap_or_2r",
+      "volumeAveragePeriod": 10
+    }
+  },
   "ui": {
-    "refreshIntervalSeconds": 60,
+    "refreshIntervalSeconds": 65,
     "theme": "system",
-    "compactMode": true
+    "compactMode": false
   }
 }

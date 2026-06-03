@@ -13,6 +13,7 @@ import { assertLiveOrderAllowed, validateTrade } from "./core/risk.js";
 import { getSettings } from "./core/configStore.js";
 import { logEvent } from "./core/ledger.js";
 import { assertKillSwitchOff } from "./core/killSwitch.js";
+import { getCandles } from "./marketData/marketDataProvider.js";
 
 const ACCOUNT_NUMBER = process.env.ROBINHOOD_ACCOUNT_NUMBER;
 
@@ -155,7 +156,7 @@ function buildEquityOrder({ accountNumber, approvedTrade }) {
 }
 
 async function main() {
-  const settings = getSettings();
+  const settings = await getSettings();
 
   assertKillSwitchOff();
 
@@ -187,6 +188,38 @@ async function main() {
     const parsedQuotes = parseTextJson(quotesText);
     const parsedOrders = parseTextJson(recentOrdersText);
     const todaySummary = summarizeTodayOrders(parsedOrders);
+    const marketData = {};
+
+    if (settings.strategy.activeStrategy === "aaoi_dip_reversal") {
+      const symbol = settings.strategyParams.aaoi_dip_reversal.symbol ?? "AAOI";
+      const marketSymbol = settings.marketData.marketConfirmationSymbol;
+      marketData.primary = await getCandles({ settings, symbol });
+      marketData.confirmation = marketSymbol
+        ? await getCandles({ settings, symbol: marketSymbol })
+        : null;
+
+      logEvent({
+        type: "MARKET_DATA_CANDLES",
+        marketData: {
+          confirmation: marketData.confirmation
+            ? {
+                attempts: marketData.confirmation.attempts,
+                count: marketData.confirmation.candles.length,
+                freshness: marketData.confirmation.freshness,
+                provider: marketData.confirmation.provider,
+                symbol: marketSymbol,
+              }
+            : null,
+          primary: {
+            attempts: marketData.primary.attempts,
+            count: marketData.primary.candles.length,
+            freshness: marketData.primary.freshness,
+            provider: marketData.primary.provider,
+            symbol,
+          },
+        },
+      });
+    }
 
     logEvent({
       type: "STRATEGY_INPUTS",
@@ -194,6 +227,9 @@ async function main() {
       parsedPortfolio,
       parsedPositions,
       parsedQuotes,
+      candles: marketData.primary?.candles ?? [],
+      marketCandles: marketData.confirmation?.candles ?? [],
+      marketData,
       portfolioText,
       positionsText,
       quotesText,
@@ -238,6 +274,13 @@ async function main() {
 
     if (rawDecision.action !== "trade") {
       throw new Error(`Invalid strategy action: ${rawDecision.action}`);
+    }
+
+    if (
+      settings.strategy.activeStrategy === "aaoi_dip_reversal" &&
+      !marketData.primary?.freshness?.liveSafe
+    ) {
+      throw new Error("Blocked: AAOI live placement requires fresh live-safe candles.");
     }
 
     const approvedTrade = validateTrade(rawDecision, {

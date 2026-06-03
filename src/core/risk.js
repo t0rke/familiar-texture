@@ -1,4 +1,4 @@
-import { getSettings } from "./configStore.js";
+import { DEFAULT_SETTINGS } from "./configStore.js";
 
 function numberOrNull(value) {
   const number = Number(value);
@@ -59,7 +59,7 @@ function asDate(value) {
   return date && Number.isFinite(date.getTime()) ? date : null;
 }
 
-export function assertLiveOrderAllowed(settings = getSettings()) {
+export function assertLiveOrderAllowed(settings = DEFAULT_SETTINGS) {
   if (settings.mode.dryRun) {
     throw new Error("Blocked: dry run mode is enabled.");
   }
@@ -88,7 +88,7 @@ export function validateTrade(
     lastTradeAt = null,
     portfolio = null,
     positions = [],
-    settings = getSettings(),
+    settings = DEFAULT_SETTINGS,
     tradesToday = 0,
   } = {}
 ) {

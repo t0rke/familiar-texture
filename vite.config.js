@@ -111,8 +111,8 @@ function readEvents() {
   return { events, invalidLines };
 }
 
-function readStatus() {
-  const settings = getSettings();
+async function readStatus() {
+  const settings = await getSettings();
 
   return {
     accountConfigured: Boolean(process.env.ROBINHOOD_ACCOUNT_NUMBER),
@@ -180,7 +180,7 @@ function getPositionSymbols(parsedPositions) {
 
 async function fetchAccountSnapshot() {
   const accountNumber = process.env.ROBINHOOD_ACCOUNT_NUMBER;
-  const settings = getSettings();
+  const settings = await getSettings();
 
   if (!accountNumber) {
     const error = new Error("Missing ROBINHOOD_ACCOUNT_NUMBER in .env");
@@ -324,14 +324,14 @@ async function handleApi(req, res, next) {
       events,
       invalidLines,
       logFile: path.relative(process.cwd(), LOG_FILE),
-      status: readStatus(),
+      status: await readStatus(),
       updatedAt: new Date().toISOString(),
     });
     return;
   }
 
   if (url.pathname === "/api/settings" && req.method === "GET") {
-    const settings = getSettings();
+    const settings = await getSettings();
     sendJson(res, {
       defaults: DEFAULT_SETTINGS,
       health: getSettingsHealth(),
@@ -346,7 +346,7 @@ async function handleApi(req, res, next) {
 
   if (url.pathname === "/api/settings" && req.method === "PATCH") {
     const body = await readRequestJson(req);
-    const validation = updateSettings(body.patch ?? {}, {
+    const validation = await updateSettings(body.patch ?? {}, {
       actor: "ui",
       confirmation: body.confirmation,
     });
@@ -362,7 +362,7 @@ async function handleApi(req, res, next) {
   }
 
   if (url.pathname === "/api/settings/reset" && req.method === "POST") {
-    const validation = resetSettings({ actor: "ui" });
+    const validation = await resetSettings({ actor: "ui" });
     sendJson(res, {
       settings: validation.settings,
       health: getSettingsHealth(),
@@ -375,7 +375,7 @@ async function handleApi(req, res, next) {
 
   if (url.pathname === "/api/settings/validate" && req.method === "POST") {
     const body = await readRequestJson(req);
-    const current = getSettings();
+    const current = await getSettings();
     const settings = body.settings ?? mergeSettings(current, body.patch ?? {});
     const validation = validateSettings(settings);
     sendJson(res, {
@@ -389,20 +389,20 @@ async function handleApi(req, res, next) {
   if (url.pathname === "/api/kill-switch/enable" && req.method === "POST") {
     enableKillSwitch();
     logEvent({ type: "KILL_SWITCH_ENABLED", actor: "ui" });
-    sendJson(res, { status: readStatus(), updatedAt: new Date().toISOString() });
+    sendJson(res, { status: await readStatus(), updatedAt: new Date().toISOString() });
     return;
   }
 
   if (url.pathname === "/api/kill-switch/disable" && req.method === "POST") {
     disableKillSwitch();
     logEvent({ type: "KILL_SWITCH_DISABLED", actor: "ui" });
-    sendJson(res, { status: readStatus(), updatedAt: new Date().toISOString() });
+    sendJson(res, { status: await readStatus(), updatedAt: new Date().toISOString() });
     return;
   }
 
   if (url.pathname === "/api/runtime-status") {
     sendJson(res, {
-      status: readStatus(),
+      status: await readStatus(),
       strategyRun: strategyRun
         ? {
             error: strategyRun.error,
@@ -435,7 +435,7 @@ async function handleApi(req, res, next) {
   if (url.pathname === "/api/account") {
     sendJson(res, {
       snapshot: accountSnapshot,
-      status: readStatus(),
+      status: await readStatus(),
       updatedAt: new Date().toISOString(),
     });
     return;
@@ -450,7 +450,7 @@ async function handleApi(req, res, next) {
 
     sendJson(res, {
       snapshot: accountSnapshot,
-      status: readStatus(),
+      status: await readStatus(),
       updatedAt: new Date().toISOString(),
     });
     return;
@@ -461,12 +461,12 @@ async function handleApi(req, res, next) {
 
 function localApiPlugin() {
   const handler = (req, res, next) => {
-    handleApi(req, res, next).catch((err) => {
+    handleApi(req, res, next).catch(async (err) => {
       sendJson(
         res,
         {
           error: err?.message ?? "Request failed",
-          status: readStatus(),
+          status: await readStatus(),
           updatedAt: new Date().toISOString(),
         },
         err?.status ?? 500

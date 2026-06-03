@@ -1,0 +1,236 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model AppSetting {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  valueJson Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model RiskProfile {
+  id                                     String   @id @default(cuid())
+  name                                   String   @unique
+  isActive                               Boolean  @default(false)
+  maxDollarsPerTrade                     Decimal
+  maxTradesPerDay                        Int
+  maxDailySpend                          Decimal
+  maxDailySellAmount                     Decimal
+  minBuyingPowerAfterTrade               Decimal
+  maxCashUsagePercentPerRun              Decimal
+  maxPortfolioAllocationPercentPerSymbol Decimal
+  cooldownMinutesAfterTrade              Int
+  allowBuys                              Boolean  @default(true)
+  allowSells                             Boolean  @default(false)
+  allowOptions                           Boolean  @default(false)
+  allowCrypto                            Boolean  @default(false)
+  requireReviewBeforePlace               Boolean  @default(true)
+  requireManualConfirmationForLive       Boolean  @default(true)
+  createdAt                              DateTime @default(now())
+  updatedAt                              DateTime @updatedAt
+}
+
+model StrategyConfig {
+  id                        String   @id @default(cuid())
+  name                      String   @unique
+  strategyKey               String
+  isActive                  Boolean  @default(false)
+  paramsJson                Json
+  riskTolerance             Decimal
+  cashReservePercent        Decimal
+  dipBuyThresholdPercent    Decimal
+  takeProfitPercent         Decimal
+  stopLossPercent           Decimal
+  rebalanceThresholdPercent Decimal
+  confidenceThreshold       Decimal
+  maxSignalAgeMinutes       Int
+  positionSizingMode        String
+  createdAt                 DateTime @default(now())
+  updatedAt                 DateTime @updatedAt
+}
+
+model SymbolList {
+  id        String   @id @default(cuid())
+  type      String
+  symbol    String
+  notes     String?
+  enabled   Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([type, symbol])
+  @@index([type])
+  @@index([symbol])
+}
+
+model TradingRun {
+  id                  String        @id @default(cuid())
+  runNumber           Int?
+  status              String
+  mode                String
+  strategyKey         String?
+  accountNumberMasked String?
+  startedAt           DateTime      @default(now())
+  finishedAt          DateTime?
+  summary             String?
+  metadataJson        Json?
+  events              TradingEvent[]
+  orderReviews        OrderReview[]
+  orders              TradeOrder[]
+}
+
+model TradingEvent {
+  id          String      @id @default(cuid())
+  runId       String?
+  run         TradingRun? @relation(fields: [runId], references: [id])
+  type        String
+  level       String      @default("info")
+  message     String?
+  symbol      String?
+  side        String?
+  amount      Decimal?
+  payloadJson Json?
+  createdAt   DateTime    @default(now())
+
+  @@index([runId])
+  @@index([type])
+  @@index([createdAt])
+  @@index([symbol])
+}
+
+model OrderReview {
+  id                   String      @id @default(cuid())
+  runId                String?
+  run                  TradingRun? @relation(fields: [runId], references: [id])
+  accountNumberMasked  String?
+  symbol               String
+  side                 String
+  orderType            String
+  quantity             Decimal?
+  dollarAmount         Decimal?
+  limitPrice           Decimal?
+  stopPrice            Decimal?
+  timeInForce          String?
+  marketHours          String?
+  quoteJson            Json?
+  orderChecksJson      Json?
+  reviewJson           Json?
+  approvedForPlacement Boolean     @default(false)
+  createdAt            DateTime    @default(now())
+
+  @@index([runId])
+  @@index([symbol])
+  @@index([createdAt])
+}
+
+model TradeOrder {
+  id                  String      @id @default(cuid())
+  runId               String?
+  run                 TradingRun? @relation(fields: [runId], references: [id])
+  robinhoodOrderId    String?
+  refId               String?     @unique
+  accountNumberMasked String?
+  symbol              String
+  side                String
+  orderType           String
+  state               String?
+  quantity            Decimal?
+  dollarAmount        Decimal?
+  averagePrice        Decimal?
+  limitPrice          Decimal?
+  stopPrice           Decimal?
+  timeInForce         String?
+  marketHours         String?
+  placedAgent         String?
+  rawJson             Json?
+  createdAt           DateTime    @default(now())
+  updatedAt           DateTime    @updatedAt
+  filledAt            DateTime?
+
+  @@index([symbol])
+  @@index([state])
+  @@index([createdAt])
+}
+
+model AccountSnapshot {
+  id                  String   @id @default(cuid())
+  accountNumberMasked String?
+  portfolioValue      Decimal?
+  equityValue         Decimal?
+  cash                Decimal?
+  buyingPower         Decimal?
+  rawJson             Json?
+  createdAt           DateTime @default(now())
+
+  @@index([createdAt])
+}
+
+model PositionSnapshot {
+  id                String   @id @default(cuid())
+  accountSnapshotId String?
+  symbol            String
+  quantity          Decimal?
+  averageCost       Decimal?
+  marketValue       Decimal?
+  rawJson           Json?
+  createdAt         DateTime @default(now())
+
+  @@index([symbol])
+  @@index([createdAt])
+}
+
+model QuoteSnapshot {
+  id            String   @id @default(cuid())
+  symbol        String
+  price         Decimal?
+  bid           Decimal?
+  ask           Decimal?
+  previousClose Decimal?
+  changePercent Decimal?
+  rawJson       Json?
+  createdAt     DateTime @default(now())
+
+  @@index([symbol])
+  @@index([createdAt])
+}
+
+model Candle {
+  id         String   @id @default(cuid())
+  symbol     String
+  interval   String
+  timestamp  DateTime
+  open       Decimal
+  high       Decimal
+  low        Decimal
+  close      Decimal
+  volume     Decimal?
+  source     String
+  isDelayed  Boolean  @default(false)
+  receivedAt DateTime @default(now())
+  rawJson    Json?
+
+  @@unique([symbol, interval, timestamp, source])
+  @@index([symbol, interval, timestamp])
+}
+
+model AuditLog {
+  id           String   @id @default(cuid())
+  actor        String   @default("local-user")
+  action       String
+  entityType   String?
+  entityId     String?
+  beforeJson   Json?
+  afterJson    Json?
+  metadataJson Json?
+  createdAt    DateTime @default(now())
+
+  @@index([action])
+  @@index([createdAt])
+}

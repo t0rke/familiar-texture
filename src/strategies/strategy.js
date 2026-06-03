@@ -1,4 +1,5 @@
 import { getSettings, STRATEGY_DEFINITIONS } from "../core/configStore.js";
+import { aaoiDipReversalStrategy } from "./aaoiDipReversal.js";
 
 function safeIncludes(text, value) {
   return String(text ?? "").toUpperCase().includes(String(value).toUpperCase());
@@ -196,6 +197,7 @@ function manualSignalStrategy({ settings }) {
 }
 
 export const strategies = {
+  aaoi_dip_reversal: aaoiDipReversalStrategy,
   dip_buyer: dipBuyerStrategy,
   fixed_dca: fixedDcaStrategy,
   manual_signal: manualSignalStrategy,
@@ -212,12 +214,16 @@ export async function getTradeIdea({
   parsedPortfolio,
   parsedPositions,
   parsedQuotes,
+  candles,
+  marketCandles,
+  marketData,
   portfolioText,
   positionsText,
   quotesText,
   recentOrdersText,
-  settings = getSettings(),
+  settings,
 }) {
+  settings ??= await getSettings();
   const strategy = strategies[settings.strategy.activeStrategy];
 
   if (!strategy) {
@@ -229,6 +235,9 @@ export async function getTradeIdea({
     parsedPortfolio,
     parsedPositions,
     parsedQuotes,
+    candles,
+    marketCandles,
+    marketData,
     portfolioText,
     positionsText,
     quotesText,
