@@ -1,19 +1,31 @@
-import "dotenv/config";
-import { createRobinhoodMcpClient } from "./mcpClient.js";
 import {
-  getAccounts,
+    createRobinhoodMcpClient,
+    closeRobinhoodMcpClient,
+} from "./core/mcpClient.js";
+import {
   getPortfolio,
+    getEquityPositions,
+    getEquityQuotes,
+    getEquityOrders,
   getEquityTradability,
   reviewEquityOrder,
   placeEquityOrder,
-} from "./robinhoodTools.js";
-import { validateTrade } from "./risk.js";
-import { logEvent } from "./ledger.js";
-import { assertKillSwitchOff } from "./killSwitch.js";
+} from "./core/robinhoodTools.js";
+import { getTradeIdea } from "./strategies/strategy.js";
+import { validateTrade } from "./core/risk.js";
+import { logEvent } from "./core/ledger.js";
+import { assertKillSwitchOff } from "./core/killSwitch.js";
 
 const DRY_RUN = process.env.DRY_RUN === "true";
 const TRADING_ENABLED = process.env.TRADING_ENABLED === "true";
+const CONFIRM_LIVE_ORDER =
+    process.env.CONFIRM_LIVE_ORDER === "YES_I_UNDERSTAND_THIS_PLACES_REAL_ORDERS";
+
 const ACCOUNT_NUMBER = process.env.ROBINHOOD_ACCOUNT_NUMBER;
+
+const WATCH_SYMBOLS = process.env.WATCH_SYMBOLS
+    ? process.env.WATCH_SYMBOLS.split(",").map((s) => s.trim().toUpperCase())
+    : ["VOO"];
 
 function extractTextContent(result) {
   const content = result?.content ?? [];
@@ -62,97 +74,182 @@ async function safeClose(client) {
   }
 }
 
+function buildEquityOrder({ accountNumber, approvedTrade }) {
+    if (approvedTrade.assetType !== "equity") {
+        throw new Error(`Unsupported assetType: ${approvedTrade.assetType}`);
+    }
+
+    const order = {
+        account_number: accountNumber,
+        symbol: approvedTrade.symbol,
+        side: approvedTrade.side,
+        type: approvedTrade.orderType ?? "market",
+        time_in_force: approvedTrade.timeInForce ?? "gfd",
+        market_hours: approvedTrade.marketHours ?? "regular_hours",
+    };
+
+    if (approvedTrade.quantity != null) {
+        order.quantity = String(approvedTrade.quantity);
+    } else {
+        order.dollar_amount = Number(approvedTrade.dollars).toFixed(2);
+    }
+
+    if (approvedTrade.limitPrice != null) {
+        order.limit_price = String(approvedTrade.limitPrice);
+    }
+
+    if (approvedTrade.stopPrice != null) {
+        order.stop_price = String(approvedTrade.stopPrice);
+    }
+
+    return order;
+}
+
 async function main() {
   assertKillSwitchOff();
 
   if (!ACCOUNT_NUMBER) {
     throw new Error(
-      "Missing ROBINHOOD_ACCOUNT_NUMBER in .env. Run get_accounts first, choose the agentic_allowed=true account, and add it to .env."
+        "Missing ROBINHOOD_ACCOUNT_NUMBER in .env. Run npm run accounts first, choose the agentic_allowed=true account, and add it to .env."
     );
   }
 
-  const rawTrade = {
-    symbol: "VOO",
-    side: "buy",
-    dollars: 1,
-    assetType: "equity",
-    reason: "Tiny test order through Node MCP client.",
-  };
+    const client = await createRobinhoodMcpClient();
 
-  const approvedTrade = validateTrade(rawTrade, 0);
+    try {
+        console.log("\nFetching account/market context...");
 
-  const order = {
-    account_number: ACCOUNT_NUMBER,
-    symbol: approvedTrade.symbol,
-    side: approvedTrade.side,
-    type: "market",
-    dollar_amount: approvedTrade.dollars.toFixed(2),
-    time_in_force: "gfd",
-    market_hours: "regular_hours",
-  };
+        const portfolio = await getPortfolio(client, ACCOUNT_NUMBER);
+        const positions = await getEquityPositions(client, ACCOUNT_NUMBER);
+        const quotes = await getEquityQuotes(client, WATCH_SYMBOLS);
+        const recentOrders = await getEquityOrders(client, {
+            account_number: ACCOUNT_NUMBER,
+            placed_agent: "agentic",
+        });
 
-  logEvent({
-    type: "LOCAL_TRADE_APPROVED",
-    trade: approvedTrade,
-    order,
-  });
+        const portfolioText = extractTextContent(portfolio);
+        const positionsText = extractTextContent(positions);
+        const quotesText = extractTextContent(quotes);
+        const recentOrdersText = extractTextContent(recentOrders);
 
-  const client = await createRobinhoodMcpClient();
+        logEvent({
+            type: "STRATEGY_INPUTS",
+            watchSymbols: WATCH_SYMBOLS,
+            portfolioText,
+            positionsText,
+            quotesText,
+            recentOrdersText,
+        });
 
-  const portfolio = await getPortfolio(client, ACCOUNT_NUMBER);
+        const rawDecision = await getTradeIdea({
+            portfolioText,
+            positionsText,
+            quotesText,
+            recentOrdersText,
+        });
 
-  logEvent({
-    type: "PORTFOLIO_CHECK",
-    portfolioText: extractTextContent(portfolio),
-  });
+        console.log("\nStrategy decision:");
+        console.log(rawDecision);
 
-  const tradability = await getEquityTradability(client, ACCOUNT_NUMBER, [
-    approvedTrade.symbol,
-  ]);
+        logEvent({
+            type: "STRATEGY_DECISION",
+            decision: rawDecision,
+        });
 
-  logEvent({
-    type: "TRADABILITY_CHECK",
-    tradabilityText: extractTextContent(tradability),
-  });
+        if (rawDecision.action === "hold") {
+            console.log("\nNo trade proposed.");
+            console.log("Reason:", rawDecision.reason);
 
-  const review = await reviewEquityOrder(client, order);
+            logEvent({
+                type: "STRATEGY_HOLD",
+                reason: rawDecision.reason,
+            });
 
-  console.log("\nOrder review result:\n");
-  console.log(extractTextContent(review));
+            await safeClose(client);
+            return;
+        }
 
-  logEvent({
-    type: "ORDER_REVIEW",
-    order,
-    reviewText: extractTextContent(review),
-  });
+        if (rawDecision.action !== "trade") {
+            throw new Error(`Invalid strategy action: ${rawDecision.action}`);
+        }
 
-  if (DRY_RUN || !TRADING_ENABLED) {
-    console.log("\nNo live order placed.");
-    console.log({ DRY_RUN, TRADING_ENABLED });
+        const tradesToday = 0;
+        const approvedTrade = validateTrade(rawDecision, tradesToday);
 
-    logEvent({
-      type: "DRY_RUN_ORDER_NOT_PLACED",
-      order,
-      dryRun: DRY_RUN,
-      tradingEnabled: TRADING_ENABLED,
-    });
+        const order = buildEquityOrder({
+            accountNumber: ACCOUNT_NUMBER,
+            approvedTrade,
+        });
 
-    await safeClose(client);
-    return;
-  }
+        logEvent({
+            type: "LOCAL_TRADE_APPROVED",
+            trade: approvedTrade,
+            order,
+        });
 
-  const placement = await placeEquityOrder(client, order);
+        const tradability = await getEquityTradability(client, ACCOUNT_NUMBER, [
+            approvedTrade.symbol,
+        ]);
 
-  console.log("\nLIVE ORDER PLACED:\n");
-  console.log(extractTextContent(placement));
+        const tradabilityText = extractTextContent(tradability);
 
-  logEvent({
-    type: "LIVE_ORDER_PLACED",
-    order,
-    placementText: extractTextContent(placement),
-  });
+        logEvent({
+            type: "TRADABILITY_CHECK",
+            symbol: approvedTrade.symbol,
+            tradabilityText,
+        });
 
-  await safeClose(client);
+        const review = await reviewEquityOrder(client, order);
+        const reviewText = extractTextContent(review);
+
+        console.log("\nOrder review result:\n");
+        console.log(reviewText);
+
+        logEvent({
+            type: "ORDER_REVIEW",
+            order,
+            reviewText,
+        });
+
+        if (DRY_RUN || !TRADING_ENABLED || !CONFIRM_LIVE_ORDER) {
+            console.log("\nNo live order placed.");
+            console.log({
+                DRY_RUN,
+                TRADING_ENABLED,
+                CONFIRM_LIVE_ORDER,
+            });
+
+            logEvent({
+                type: "ORDER_REVIEWED_BUT_NOT_PLACED",
+                order,
+                dryRun: DRY_RUN,
+                tradingEnabled: TRADING_ENABLED,
+                confirmLiveOrder: CONFIRM_LIVE_ORDER,
+            });
+
+            await safeClose(client);
+            return;
+        }
+
+        assertKillSwitchOff();
+
+        const placement = await placeEquityOrder(client, order);
+        const placementText = extractTextContent(placement);
+
+        console.log("\nLIVE ORDER PLACED:\n");
+        console.log(placementText);
+
+        logEvent({
+            type: "LIVE_ORDER_PLACED",
+            order,
+            placementText,
+        });
+
+        await safeClose(client);
+    } catch (err) {
+        await safeClose(client);
+        throw err;
+    }
 }
 
 main().catch((err) => {

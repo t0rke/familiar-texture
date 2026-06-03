@@ -2,8 +2,8 @@ import "dotenv/config";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
 import { UnauthorizedError } from "@modelcontextprotocol/sdk/client/auth.js";
-import { RobinhoodOAuthProvider } from "./auth/authProvider.js";
-import { createOAuthCallbackServer } from "./auth/callbackServer.js";
+import { RobinhoodOAuthProvider } from "../auth/authProvider.js";
+import { createOAuthCallbackServer } from "../auth/callbackServer.js";
 
 const MCP_URL = process.env.ROBINHOOD_MCP_URL;
 
@@ -11,8 +11,18 @@ if (!MCP_URL) {
   throw new Error("Missing ROBINHOOD_MCP_URL in .env");
 }
 
+function isBenignStreamCloseError(err) {
+  const message = String(err?.message ?? err);
+
+  return (
+    message.includes("SSE stream disconnected") ||
+    message.includes("This operation was aborted") ||
+    message.includes("AbortError")
+  );
+}
+
 function createClient() {
-  return new Client(
+  const client = new Client(
     {
       name: "familiar-texture",
       version: "0.1.0",
@@ -21,12 +31,38 @@ function createClient() {
       capabilities: {},
     }
   );
+
+  client.onerror = (err) => {
+    if (isBenignStreamCloseError(err)) {
+      return;
+    }
+
+    console.error("[MCP error]", err);
+  };
+
+  client.onclose = () => {
+    console.log("[MCP closed]");
+  };
+
+  return client;
 }
 
 function createTransport(provider) {
   return new StreamableHTTPClientTransport(new URL(MCP_URL), {
     authProvider: provider,
   });
+}
+
+export async function closeRobinhoodMcpClient(client) {
+  try {
+    await client.close();
+  } catch (err) {
+    if (isBenignStreamCloseError(err)) {
+      return;
+    }
+
+    throw err;
+  }
 }
 
 export async function createRobinhoodMcpClient() {
@@ -41,14 +77,6 @@ export async function createRobinhoodMcpClient() {
 
   let client = createClient();
   let transport = createTransport(provider);
-
-  client.onerror = (err) => {
-    console.error("[MCP error]", err);
-  };
-
-  client.onclose = () => {
-    console.log("[MCP closed]");
-  };
 
   try {
     await client.connect(transport);
@@ -71,17 +99,8 @@ export async function createRobinhoodMcpClient() {
 
     await callbackServer.close();
 
-    // Recreate a fresh client/transport after tokens are saved.
     client = createClient();
     transport = createTransport(provider);
-
-    client.onerror = (error) => {
-      console.error("[MCP error]", error);
-    };
-
-    client.onclose = () => {
-      console.log("[MCP closed]");
-    };
 
     await client.connect(transport);
 

@@ -36,14 +36,28 @@ export function validateTrade(trade, tradesToday = 0) {
     throw new Error("Blocked: crypto is disabled.");
   }
 
-  if (!Number.isFinite(trade.dollars) || trade.dollars <= 0) {
-    throw new Error("Blocked: invalid dollar amount.");
+  if (trade.quantity != null && trade.dollars != null) {
+    throw new Error("Blocked: provide either quantity or dollars, not both.");
   }
 
-  if (trade.dollars > maxDollarsPerTrade) {
-    throw new Error(
-      `Blocked: $${trade.dollars} exceeds max $${maxDollarsPerTrade}.`
-    );
+  if (trade.dollars != null) {
+    if (!Number.isFinite(trade.dollars) || trade.dollars <= 0) {
+      throw new Error("Blocked: invalid dollar amount.");
+    }
+
+    if (trade.dollars > maxDollarsPerTrade) {
+      throw new Error(
+        `Blocked: $${trade.dollars} exceeds max $${maxDollarsPerTrade}.`
+      );
+    }
+  }
+
+  if (trade.quantity != null) {
+    const quantity = Number(trade.quantity);
+
+    if (!Number.isFinite(quantity) || quantity <= 0) {
+      throw new Error("Blocked: invalid quantity.");
+    }
   }
 
   if (tradesToday >= maxTradesPerDay) {

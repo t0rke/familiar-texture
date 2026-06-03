@@ -1,4 +1,4 @@
-import { createRobinhoodMcpClient } from "./mcpClient.js";
+import { createRobinhoodMcpClient } from "../core/mcpClient.js";
 
 async function safeClose(client) {
   try {

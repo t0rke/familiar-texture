@@ -2,14 +2,15 @@
   "name": "familiar-texture",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "src/runOrder.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon src/index.js",
-    "discover": "node src/discoverTools.js",
-    "start": "node src/index.js",
+    "dev": "nodemon src/runOrder.js",
+    "discover": "node src/scripts/discoverTools.js",
+    "start": "node src/runOrder.js",
     "order": "node src/runOrder.js",
-    "accounts": "node src/listAccounts.js"
+    "accounts": "node src/scripts/listAccounts.js",
+    "orders": "node src/scripts/listOrders.js"
   },
   "keywords": [],
   "author": "",

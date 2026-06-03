@@ -1,5 +1,5 @@
-import { createRobinhoodMcpClient } from "./mcpClient.js";
-import { getAccounts } from "./robinhoodTools.js";
+import { createRobinhoodMcpClient } from "../core/mcpClient.js";
+import { getAccounts } from "../core/robinhoodTools.js";
 
 function extractTextContent(result) {
   const content = result?.content ?? [];

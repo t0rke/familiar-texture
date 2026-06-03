@@ -17,11 +17,27 @@ export async function getPortfolio(client, account_number) {
   });
 }
 
+export async function getEquityPositions(client, account_number) {
+  return callRobinhoodTool(client, "get_equity_positions", {
+    account_number,
+  });
+}
+
+export async function getEquityQuotes(client, symbols) {
+  return callRobinhoodTool(client, "get_equity_quotes", {
+    symbols,
+  });
+}
+
 export async function getEquityTradability(client, account_number, symbols) {
   return callRobinhoodTool(client, "get_equity_tradability", {
     account_number,
     symbols,
   });
+}
+
+export async function getEquityOrders(client, args) {
+  return callRobinhoodTool(client, "get_equity_orders", args);
 }
 
 export async function reviewEquityOrder(client, order) {
