@@ -789,7 +789,7 @@ function AppShell({
         <LiquidNav currentPath={currentRoute.path} onNavigate={navigate} routes={routes} />
       </aside>
 
-      <section className="shell-main">
+      <section className={`shell-main route-${currentRoute.path.slice(1)}`}>
         <header className="shell-header">
           <div>
             <p className="eyebrow">familiar texture</p>
