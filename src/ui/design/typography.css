@@ -6,39 +6,39 @@
   --text-md: 1rem;
   --text-lg: 1.18rem;
   --text-xl: 1.45rem;
-  --text-display-1: clamp(3.4rem, 10vw, 9.8rem);
-  --text-display-2: clamp(2.4rem, 6vw, 6rem);
+  --text-display-1: clamp(4.4rem, 11vw, 10.4rem);
+  --text-display-2: clamp(2.6rem, 6.4vw, 7rem);
   --text-display-3: clamp(1.8rem, 4vw, 4.2rem);
-  --line-tight: 0.9;
+  --line-tight: 0.94;
   --line-normal: 1.5;
   --tracking-tight: 0;
 }
 
 .display-1 {
   font-size: var(--text-display-1);
-  font-weight: 950;
+  font-weight: 310;
   letter-spacing: var(--tracking-tight);
   line-height: var(--line-tight);
-  text-transform: uppercase;
+  text-transform: none;
 }
 
 .display-2 {
   font-size: var(--text-display-2);
-  font-weight: 950;
+  font-weight: 420;
   letter-spacing: var(--tracking-tight);
   line-height: 0.94;
 }
 
 .heading-1 {
   font-size: var(--text-display-3);
-  font-weight: 950;
+  font-weight: 520;
   letter-spacing: var(--tracking-tight);
   line-height: 0.96;
 }
 
 .heading-2 {
   font-size: var(--text-xl);
-  font-weight: 900;
+  font-weight: 780;
   line-height: 1.05;
 }
 
@@ -51,7 +51,7 @@
 .body-muted {
   color: var(--color-ink-muted);
   font-size: var(--text-sm);
-  font-weight: 750;
+  font-weight: 620;
 }
 
 .mono-label {

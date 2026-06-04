@@ -815,19 +815,21 @@ function AppShell({
   safeMode,
   status,
 }) {
+  const heroTabs = getHeroTabs(currentRoute.path, status);
+
   return (
     <div className="app-shell">
       <aside className="shell-rail">
         <div className="brand-mark">
-          <span>FT</span>
-          <strong>familiar</strong>
+          <ClothLogo />
+          <strong>familiar texture</strong>
         </div>
         <LiquidNav currentPath={currentRoute.path} onNavigate={navigate} routes={routes} />
       </aside>
 
       <section className={`shell-main route-${currentRoute.path.slice(1)}`}>
         <header className="shell-header">
-          <div>
+          <div className="hero-copy">
             <p className="eyebrow">familiar texture</p>
             <h1>{currentRoute.label}</h1>
             <p className="page-subtitle">{currentRoute.description}</p>
@@ -851,11 +853,106 @@ function AppShell({
               <RefreshCw size={18} className={loading ? "spin" : ""} />
             </button>
           </div>
+
+          <div className="hero-tabs" aria-label="Page status">
+            {heroTabs.map((tab) => (
+              <span className={tab.active ? "active" : ""} key={tab.label}>
+                {tab.label}
+              </span>
+            ))}
+          </div>
         </header>
 
         <div className="page-content">{children}</div>
       </section>
     </div>
+  );
+}
+
+function getHeroTabs(path, status) {
+  const runtime = status.tradingEnabled
+    ? status.confirmLiveOrder
+      ? "Live gated"
+      : "Unconfirmed"
+    : "Dry control";
+  const kill = status.killSwitchActive ? "Kill active" : "Kill clear";
+  const account = status.accountConfigured ? "Broker linked" : "Broker missing";
+  const common = [
+    { active: true, label: runtime },
+    { active: !status.killSwitchActive, label: kill },
+    { active: status.accountConfigured, label: account },
+  ];
+  const routeTabs = {
+    "/api": ["Endpoint map", "MCP tools", "Safety notes"],
+    "/dashboard": ["Portfolio", "Signals", "Ledger"],
+    "/design-system": ["Colors", "Typography", "Components"],
+    "/ledger": ["Runs", "Events", "Audit"],
+    "/market-data": ["Candles", "Freshness", "Providers"],
+    "/risk": ["Allowlist", "Limits", "Danger zones"],
+    "/settings": ["Persistence", "Theme", "Secrets safe"],
+    "/strategy": ["AAOI", "Indicators", "Scoring"],
+  };
+
+  if (!routeTabs[path]) return common;
+
+  return routeTabs[path].map((label, index) => ({ active: index === 1, label }));
+}
+
+function ClothLogo() {
+  return (
+    <svg
+      aria-hidden="true"
+      className="cloth-logo"
+      viewBox="0 0 64 64"
+      focusable="false"
+    >
+      <defs>
+        <linearGradient id="clothLogoBlue" x1="8" x2="52" y1="8" y2="58">
+          <stop stopColor="#d9e4e8" />
+          <stop offset="0.46" stopColor="#5f879b" />
+          <stop offset="1" stopColor="#173f5f" />
+        </linearGradient>
+        <linearGradient id="clothLogoGreen" x1="14" x2="58" y1="58" y2="8">
+          <stop stopColor="#203f55" />
+          <stop offset="0.42" stopColor="#36a66a" />
+          <stop offset="1" stopColor="#b7f46b" />
+        </linearGradient>
+      </defs>
+      <path
+        d="M11 13c12 0 18 7 26 13 5 4 9 5 16 4-4 10-12 17-23 17-12 0-20-8-24-21 3-7 2-10 5-13Z"
+        fill="url(#clothLogoBlue)"
+      />
+      <path
+        d="M53 14c-9 2-16 8-22 17-5 7-11 11-21 11 5 8 13 12 23 9 12-3 20-16 20-37Z"
+        fill="url(#clothLogoGreen)"
+        opacity="0.92"
+      />
+      <path
+        d="M12 13c10 16 23 22 41 17"
+        fill="none"
+        opacity="0.62"
+        stroke="rgba(255,255,255,.78)"
+        strokeLinecap="round"
+        strokeWidth="3"
+      />
+      <path
+        d="M12 42c12 0 21-4 29-15"
+        fill="none"
+        opacity="0.36"
+        stroke="rgba(255,255,255,.9)"
+        strokeLinecap="round"
+        strokeWidth="2"
+      />
+      <path
+        d="M33 42 45 30l6 5 4-15"
+        fill="none"
+        opacity="0.92"
+        stroke="rgba(225,255,202,.92)"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="3"
+      />
+    </svg>
   );
 }
 
@@ -1352,14 +1449,48 @@ function ApiDocsPage({ health, settings, status }) {
 }
 
 const colorTokens = [
-  ["Primary Ink", "--color-ink", "#080a0f", "Primary text and hard labels"],
-  ["Soft Background", "--color-bg", "#f4f5f2", "Application canvas"],
-  ["Glass Surface", "--color-glass", "rgba(255,255,255,.78)", "Panels and nav"],
-  ["Electric Lime", "--color-accent", "#dfff61", "Active signal accent"],
-  ["Info Blue", "--color-info", "#2f73ff", "Links and technical emphasis"],
-  ["Trading Green", "--color-success", "#10a967", "Safe/pass states"],
-  ["Warning Amber", "--color-warning", "#d97706", "Review states"],
-  ["Danger Red", "--color-danger", "#ff4f43", "Live/danger states"],
+  ["Paper", "--color-bg", "#f7f7f4", "Application canvas and quiet page bands"],
+  ["Ink", "--color-ink", "#111418", "Primary text, symbols, and hard labels"],
+  ["Muted", "--color-ink-muted", "#767b7d", "Secondary labels and explanatory copy"],
+  ["Mist", "--color-mist", "#dce8eb", "Soft atmospheric texture and separators"],
+  ["Cloud Blue", "--color-cloud-blue", "#bfd4d6", "Cool glass highlights and chart fills"],
+  ["Deep Blue", "--color-deep-blue", "#004967", "Research, confidence, and hero depth"],
+  ["Midnight", "--color-midnight", "#071723", "Dark control surfaces and code panels"],
+  ["Execution Blue", "--color-info", "#0066ff", "Active controls and technical emphasis"],
+  ["Thermal", "--color-thermal", "#ff5c22", "Energy, execution pressure, and hero warmth"],
+  ["Growth Green", "--color-success", "#22c55e", "Pass states, allowed trading, and gains"],
+];
+
+const designPrinciples = [
+  ["Atmosphere", "Blurred texture carries emotion; components stay precise and quiet."],
+  ["Control", "Trading actions always surface state, review, confirmation, and audit context."],
+  ["Legibility", "Numbers, symbols, routes, and limits must scan faster than the decoration."],
+  ["Institutional", "Use premium restraint: measured radii, thin hairlines, soft shadows, no gimmicks."],
+];
+
+const pageStandards = [
+  ["Hero Canvas", "Sharp rectangular abstract texture, oversized centered title, compact glass tabs."],
+  ["Section Shell", "Frosted white panel with numbered header, 12px internal grid, visible hairline."],
+  ["Control Surface", "Midnight panel for dangerous or operational settings; light cards inside."],
+  ["Data Lists", "Tabular numerals, compact rows, strong first label, muted metadata."],
+  ["Mobile", "Preserve hierarchy; hide extra nav labels, keep all controls reachable and non-overlapping."],
+];
+
+const componentStandards = [
+  ["Buttons", "12px radius, icon-first commands, blue for primary, white for neutral, red for danger."],
+  ["Cards", "12-18px radius, white glass, thin hairline, small shadow only when hierarchy needs it."],
+  ["Inputs", "42px minimum height, frosted white fill, clear focus ring, no decorative labels."],
+  ["Badges", "Functional status chips with dot, short copy, and strict color semantics."],
+  ["Tables", "Dense rows, muted uppercase headers, tabular numerals, no oversized card padding."],
+  ["Motion", "Subtle transforms only; reduced-motion disables liquid movement and animation."],
+];
+
+const stateStandards = [
+  ["Info", "Execution Blue", "Technical emphasis, active tabs, safe links"],
+  ["Success", "Growth Green", "Allowed symbols, clear kill switch, passing validation"],
+  ["Warning", "Amber", "Review needed, stale data, dry-run-only uncertainty"],
+  ["Danger", "Red", "Live trading, kill switch, destructive settings"],
+  ["Disabled", "Muted", "Unavailable, unconfigured, or blocked controls"],
 ];
 
 function DesignSystemPage() {
@@ -1367,64 +1498,234 @@ function DesignSystemPage() {
     <>
       <PageHeader
         title="Design System"
-        subtitle="Tokens, typography, surfaces, components, and motion rules for Familiar Texture."
+        subtitle="The canonical design language for Familiar Texture: premium agentic trading, precise controls, and safety-first visual standards."
       />
       <section className="system-hero">
         <div>
-          <p className="eyebrow">figma board / trading cockpit</p>
-          <h2>One product language.</h2>
+          <p className="eyebrow">design handoff / product language</p>
+          <h2>Autonomous investing without losing control.</h2>
           <p>
-            Premium design software energy, institutional trading clarity, and explicit safety
-            states live in the same reusable visual system.
+            The app should feel like a high-trust control room: atmospheric enough to be memorable,
+            restrained enough for money movement, and explicit enough that every trading state is
+            legible at a glance.
           </p>
         </div>
-        <div className="system-wordmark">FT.</div>
-      </section>
-      <section className="design-board">
-        <div className="board-header">
-          <span>Colors</span>
-          <strong>Core tokens</strong>
+        <div className="system-wordmark">
+          <ClothLogo />
+          <span>Familiar Texture</span>
         </div>
+      </section>
+
+      <DesignSection
+        number="1"
+        title="Brand Essence"
+        note="The feeling: intelligent, precise, calm, high-trust, and operationally serious."
+      >
+        <div className="design-principle-grid">
+          {designPrinciples.map(([title, detail]) => (
+            <article className="design-card strong" key={title}>
+              <p className="eyebrow">{title}</p>
+              <h3>{detail}</h3>
+            </article>
+          ))}
+        </div>
+      </DesignSection>
+
+      <DesignSection
+        number="2"
+        title="Color System"
+        note="Blue establishes confidence, thermal orange adds energy, green is reserved for actual growth or pass states."
+      >
         <div className="swatch-grid">
           {colorTokens.map(([name, token, value, note]) => (
             <TokenSwatch key={token} name={name} note={note} token={token} value={value} />
           ))}
         </div>
-      </section>
-      <section className="two-column-grid docs-grid">
-        <section className="section-card docs-panel typography-specimen">
-          <p className="eyebrow">typography</p>
-          <h3>Familiar Texture</h3>
-          <strong>AAOI Dip Reversal</strong>
-          <span>$1,240.52 · VWAP · RSI · MACD</span>
-          <p>ABCDEFGHIJKLMNOPQRSTUVWXYZ / 0123456789</p>
-        </section>
-        <section className="section-card dark-doc-panel">
-          <div className="section-heading">
-            <span>components</span>
-            <strong>shared primitives</strong>
-          </div>
-          <div className="component-gallery">
-            <button className="primary-button light">Primary</button>
-            <button className="secondary-button">Secondary</button>
-            <span className="run-status dry">Dry run</span>
-            <span className="system-chip lime">AAOI</span>
-            <MiniStat label="Max Trade" value="$1.00" />
-          </div>
-        </section>
-      </section>
-      <section className="design-board">
-        <div className="board-header">
-          <span>Layout / Motion</span>
-          <strong>Rules</strong>
+        <div className="theme-matrix">
+          {[
+            ["Dashboard / Core", "Trust + intelligence + warmth", ["#004967", "#bfd4d6", "#ff5c22", "#f7f7f4", "#111418"]],
+            ["Portfolio / Growth", "Positive capital and allocation", ["#0b4c8c", "#c6e6e0", "#22c55e", "#e7faf1", "#182620"]],
+            ["Research / Analysis", "Ideas, signals, and evidence", ["#3647b7", "#a5b4fc", "#7c3aed", "#f1edff", "#1f2141"]],
+            ["Risk / Execution", "Warnings and irreversible actions", ["#071723", "#ef4444", "#ffb020", "#fff7e7", "#f7f7f4"]],
+          ].map(([name, note, colors]) => (
+            <div className="theme-row" key={name}>
+              <div>
+                <strong>{name}</strong>
+                <span>{note}</span>
+              </div>
+              {colors.map((color) => (
+                <i style={{ "--c": color }} key={color} />
+              ))}
+            </div>
+          ))}
         </div>
-        <div className="three-column-grid">
-          <SpecCard title="Grid" value="12 / 8px" detail="Tokenized rhythm across pages" tone="info" />
-          <SpecCard title="Radius" value="8px" detail="Crisp product cards and panels" tone="success" />
-          <SpecCard title="Motion" value="Reduced safe" detail="LiquidNav honors reduced motion" tone="warning" />
+      </DesignSection>
+
+      <DesignSection
+        number="3"
+        title="Typography & Numbers"
+        note="Large type can be cinematic; product text and financial numbers stay calm and scannable."
+      >
+        <div className="type-spec-grid">
+          <section className="design-card type-hero">
+            <p className="eyebrow">Display</p>
+            <h3>Agentic<br />Trading</h3>
+            <p>Display type is light, oversized, and centered only in hero contexts.</p>
+          </section>
+          <section className="design-card type-stack">
+            {[
+              ["Hero title", "Settings", "clamp(4.4rem, 11vw, 10.4rem)", "310"],
+              ["Page title", "Risk & Limits", "clamp(2.6rem, 6vw, 7rem)", "420"],
+              ["Section", "Order Review", "1.18rem", "780"],
+              ["Body", "Server-side safety checks remain authoritative.", "1rem", "500"],
+              ["Numeric", "$1,240.52", "tabular", "420"],
+            ].map(([label, sample, scale, weight]) => (
+              <div className="type-row" key={label}>
+                <span>{label}</span>
+                <strong>{sample}</strong>
+                <small>{scale} / {weight}</small>
+              </div>
+            ))}
+          </section>
         </div>
-      </section>
+      </DesignSection>
+
+      <DesignSection
+        number="4"
+        title="Page System"
+        note="Every route uses the same anatomy so navigation feels predictable under pressure."
+      >
+        <div className="page-tiles">
+          {[
+            ["Dashboard", "Core", "#ff5c22"],
+            ["Ledger", "Audit", "#cfe96a"],
+            ["Execution", "Safety", "#ef4444"],
+          ].map(([title, label, glow]) => (
+            <article className="page-tile" style={{ "--glow": glow }} key={title}>
+              <div className="tile-head">
+                <h3>{title}</h3>
+                <span className="system-chip">{label}</span>
+              </div>
+              <div className="mini-layout">
+                <div className="mini-nav">
+                  <span className="active" />
+                  <span />
+                  <span />
+                  <span />
+                </div>
+                <div className="mini-main">
+                  <div className="mini-cards">
+                    <span><b /><i /></span>
+                    <span><b /><i /></span>
+                    <span><b /><i /></span>
+                  </div>
+                  <div className="mini-chart">
+                    <svg viewBox="0 0 240 88" aria-hidden="true">
+                      <path d="M8 62 C42 18 70 72 106 38 S172 26 232 58" fill="none" stroke="currentColor" strokeWidth="5" />
+                    </svg>
+                  </div>
+                  <div className="mini-table"><span /><span /><span /></div>
+                </div>
+              </div>
+            </article>
+          ))}
+        </div>
+        <div className="design-rule-grid">
+          {pageStandards.map(([title, detail]) => (
+            <SpecCard key={title} title={title} value={title.split(" ")[0]} detail={detail} tone="info" />
+          ))}
+        </div>
+      </DesignSection>
+
+      <DesignSection
+        number="5"
+        title="Component Standards"
+        note="Use these primitives across all pages before inventing new component shapes."
+      >
+        <div className="component-gallery design-components">
+          <button className="primary-button light"><Play size={15} /> Run Strategy</button>
+          <button className="secondary-button"><RefreshCw size={15} /> Refresh</button>
+          <button className="danger-button"><ShieldAlert size={15} /> Kill Switch</button>
+          <label className="search-box">
+            <Search size={15} />
+            <input placeholder="Search ledger" readOnly />
+          </label>
+          <div className="segmented">
+            <button>Runs</button>
+            <button className="active">Events</button>
+            <button>Audit</button>
+          </div>
+          <span className="badge-demo success"><span /> Kill clear</span>
+          <span className="badge-demo danger"><span /> Live blocked</span>
+          <MiniStat label="Max Trade" value="$1.00" />
+        </div>
+        <div className="design-rule-grid">
+          {componentStandards.map(([title, detail]) => (
+            <SpecCard key={title} title={title} value={title} detail={detail} tone="success" />
+          ))}
+        </div>
+      </DesignSection>
+
+      <DesignSection
+        number="6"
+        title="Trading State Language"
+        note="Safety colors are semantic. They are not decorative accents."
+      >
+        <div className="state-matrix">
+          {stateStandards.map(([state, color, usage]) => (
+            <article className={`state-card ${state.toLowerCase()}`} key={state}>
+              <span>{state}</span>
+              <strong>{color}</strong>
+              <small>{usage}</small>
+            </article>
+          ))}
+        </div>
+      </DesignSection>
+
+      <DesignSection
+        number="7"
+        title="Implementation Rules"
+        note="The standard that every future component should satisfy before it ships."
+      >
+        <div className="do-dont-grid">
+          <article className="design-card strong">
+            <p className="eyebrow">Do</p>
+            <ul>
+              <li>Use the shared token colors and section shells.</li>
+              <li>Keep financial rows dense and numbers tabular.</li>
+              <li>Reserve red and green for real safety or market meaning.</li>
+              <li>Use icons for commands and concise text for labels.</li>
+              <li>Honor reduced motion and visible focus states.</li>
+            </ul>
+          </article>
+          <article className="design-card">
+            <p className="eyebrow">Do not</p>
+            <ul>
+              <li>Repeat decorative gradients inside every card.</li>
+              <li>Use huge type inside controls, tables, or compact panels.</li>
+              <li>Hide trading risk behind frontend-only styling.</li>
+              <li>Create one-off rounded pills when a shared primitive exists.</li>
+              <li>Let mobile text overlap or resize component geometry.</li>
+            </ul>
+          </article>
+        </div>
+      </DesignSection>
     </>
+  );
+}
+
+function DesignSection({ children, note, number, title }) {
+  return (
+    <section className="design-section">
+      <header className="design-section-header">
+        <h2>
+          <span>{number}</span>
+          {title}
+        </h2>
+        <p>{note}</p>
+      </header>
+      <div className="design-section-body">{children}</div>
+    </section>
   );
 }
 

@@ -13,7 +13,7 @@
 
 .two-column-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(320px, 0.72fr);
+  grid-template-columns: minmax(0, 1.05fr) minmax(320px, 0.95fr);
   gap: var(--space-4);
   align-items: start;
 }
@@ -26,6 +26,15 @@
 
 .hero-panel,
 .section-card {
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--color-border-soft);
+  border-radius: var(--radius-sm);
+}
+
+.section-shell {
+  border: 1px solid var(--color-border-soft);
   border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.58);
+  box-shadow: var(--shadow-sm);
+  backdrop-filter: blur(18px);
+  overflow: hidden;
 }

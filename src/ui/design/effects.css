@@ -1,6 +1,6 @@
 .glass-surface {
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.88), rgba(246, 248, 252, 0.68)),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.86), rgba(251, 251, 248, 0.62)),
     var(--color-glass);
   box-shadow: var(--shadow-glass);
   backdrop-filter: var(--blur-glass);
@@ -8,10 +8,33 @@
 
 .dark-surface {
   background:
-    linear-gradient(180deg, rgba(27, 31, 41, 0.98), rgba(8, 10, 15, 0.99)),
+    radial-gradient(circle at 88% 0%, rgba(255, 92, 34, 0.16), transparent 180px),
+    linear-gradient(145deg, #07121d, #111b27),
     var(--color-surface-dark);
   box-shadow: var(--shadow-lg);
   color: #ffffff;
+}
+
+.texture-surface {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background: #dde4e2;
+}
+
+.texture-surface::before {
+  position: absolute;
+  inset: -12%;
+  z-index: -2;
+  background:
+    radial-gradient(ellipse at 18% 3%, rgba(255, 255, 255, 0.92) 0%, rgba(255, 255, 255, 0.5) 15%, transparent 32%),
+    radial-gradient(ellipse at 27% 22%, rgba(191, 212, 214, 0.95) 0%, rgba(191, 212, 214, 0.78) 18%, transparent 38%),
+    radial-gradient(ellipse at 28% 72%, rgba(0, 73, 103, 0.98) 0%, rgba(0, 73, 103, 0.9) 18%, rgba(4, 36, 59, 0.82) 39%, transparent 58%),
+    radial-gradient(ellipse at 85% 30%, rgba(255, 92, 34, 0.98) 0%, rgba(255, 92, 34, 0.9) 25%, rgba(200, 101, 75, 0.65) 43%, transparent 66%),
+    radial-gradient(ellipse at 75% 82%, rgba(5, 23, 35, 0.88) 0%, rgba(5, 23, 35, 0.7) 30%, transparent 54%),
+    linear-gradient(120deg, #d8dedb, #b8d0d3 33%, #004967 50%, #071723 64%, #ff5c22 100%);
+  filter: blur(18px) saturate(1.08);
+  content: "";
 }
 
 .accent-underline {
@@ -24,6 +47,6 @@
   bottom: -8px;
   left: 0;
   height: 2px;
-  background: repeating-linear-gradient(90deg, var(--color-accent) 0 8px, transparent 8px 16px);
+  background: repeating-linear-gradient(90deg, var(--color-info) 0 8px, transparent 8px 16px);
   content: "";
 }
