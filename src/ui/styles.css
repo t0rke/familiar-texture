@@ -5621,3 +5621,378 @@ h1 {
     grid-template-columns: repeat(4, 1fr);
   }
 }
+
+/* Focused refinement: corrected nav tracking and coastal, high-trust hero color. */
+.shell-rail {
+  background:
+    radial-gradient(ellipse 42% 120% at 8% 0%, rgba(255, 255, 255, 0.88), transparent 62%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.66), rgba(247, 247, 244, 0.48)),
+    rgba(247, 247, 244, 0.58);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.88),
+    0 18px 50px rgba(13, 27, 34, 0.1);
+  backdrop-filter: blur(24px) saturate(1.28);
+  -webkit-backdrop-filter: blur(24px) saturate(1.28);
+}
+
+.liquid-nav {
+  --nav-gap: 8px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: visible;
+}
+
+.liquid-nav-track {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--nav-gap);
+  padding: 5px;
+}
+
+.liquid-nav-blob {
+  top: 5px;
+  left: calc(5px + (var(--hover-index) * (var(--nav-item) + var(--nav-gap))));
+  width: var(--nav-item);
+  height: var(--nav-item);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  background:
+    radial-gradient(circle at 30% 18%, rgba(255, 255, 255, 0.94), transparent 40%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.76), rgba(229, 238, 237, 0.58)),
+    rgba(255, 255, 255, 0.58);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    0 12px 26px rgba(10, 39, 49, 0.13);
+  transform: none;
+  transition:
+    left 260ms cubic-bezier(0.2, 0.86, 0.2, 1),
+    transform 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.liquid-nav:hover .liquid-nav-blob,
+.liquid-nav:focus-within .liquid-nav-blob {
+  transform: scale(1.06);
+}
+
+.liquid-nav-item {
+  transform: translateX(var(--item-offset)) scale(var(--item-scale));
+}
+
+.liquid-nav-item.active {
+  color: #0f1718;
+}
+
+.liquid-nav-item span {
+  top: calc(100% + 11px);
+  left: 50%;
+  border-color: rgba(255, 255, 255, 0.76);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(247, 247, 244, 0.84)),
+    rgba(255, 255, 255, 0.9);
+  color: #29302f;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    0 12px 28px rgba(13, 27, 34, 0.12);
+  transform: translateX(-50%) translateY(-4px);
+  backdrop-filter: blur(14px) saturate(1.18);
+  -webkit-backdrop-filter: blur(14px) saturate(1.18);
+}
+
+.liquid-nav-item:hover span,
+.liquid-nav-item:focus-visible span {
+  transform: translateX(-50%) translateY(0);
+}
+
+.shell-main {
+  --hero-foam: #eef4f1;
+  --hero-glass: #bdd8d5;
+  --hero-ocean: #0b5464;
+  --hero-depth: #061b22;
+  --hero-gold: #d1b16d;
+  --hero-pearl: #f8f6ef;
+}
+
+.route-dashboard,
+.route-design-system {
+  --hero-foam: #edf4f1;
+  --hero-glass: #bdd8d5;
+  --hero-ocean: #064c60;
+  --hero-depth: #061922;
+  --hero-gold: #d5b86e;
+}
+
+.route-ledger {
+  --hero-foam: #f1f1ea;
+  --hero-glass: #cad8d2;
+  --hero-ocean: #2f3d3d;
+  --hero-depth: #0b1214;
+  --hero-gold: #c8b473;
+}
+
+.route-strategy {
+  --hero-foam: #eef4f3;
+  --hero-glass: #c7d9d8;
+  --hero-ocean: #274f6f;
+  --hero-depth: #101d2b;
+  --hero-gold: #b99b68;
+}
+
+.route-risk,
+.route-execution {
+  --hero-foam: #f4f0e8;
+  --hero-glass: #cdd4cf;
+  --hero-ocean: #16282d;
+  --hero-depth: #071014;
+  --hero-gold: #bf8c62;
+}
+
+.route-market-data {
+  --hero-foam: #eef6f4;
+  --hero-glass: #b6d8d4;
+  --hero-ocean: #0a5d72;
+  --hero-depth: #062232;
+  --hero-gold: #cdb16f;
+}
+
+.route-api {
+  --hero-foam: #eef2ef;
+  --hero-glass: #bdcbc8;
+  --hero-ocean: #1b3741;
+  --hero-depth: #071723;
+  --hero-gold: #9fb9c2;
+}
+
+.route-settings {
+  --hero-foam: #f4f1e8;
+  --hero-glass: #cbd5cc;
+  --hero-ocean: #293d3d;
+  --hero-depth: #121d1d;
+  --hero-gold: #c1a56b;
+}
+
+.shell-header {
+  border-color: rgba(255, 255, 255, 0.82);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.24), rgba(255, 255, 255, 0.04)),
+    var(--hero-foam);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.68),
+    0 38px 96px rgba(8, 22, 29, 0.14);
+}
+
+.shell-header::before,
+.account-panel::before,
+.system-hero::before,
+.market-hero::before {
+  background:
+    radial-gradient(ellipse 46% 34% at 5% 0%, rgba(255, 255, 255, 0.96) 0%, rgba(255, 255, 255, 0.62) 24%, transparent 62%),
+    radial-gradient(ellipse 50% 48% at 18% 24%, color-mix(in srgb, var(--hero-glass) 92%, white 8%) 0%, color-mix(in srgb, var(--hero-glass) 74%, transparent) 32%, transparent 64%),
+    radial-gradient(ellipse 56% 66% at 30% 78%, var(--hero-ocean) 0%, color-mix(in srgb, var(--hero-depth) 74%, transparent) 44%, transparent 72%),
+    radial-gradient(ellipse 50% 58% at 88% 24%, color-mix(in srgb, var(--hero-gold) 86%, white 14%) 0%, color-mix(in srgb, var(--hero-gold) 58%, transparent) 36%, transparent 70%),
+    radial-gradient(ellipse 54% 58% at 78% 82%, rgba(5, 23, 35, 0.86) 0%, rgba(5, 23, 35, 0.54) 38%, transparent 68%),
+    linear-gradient(118deg, var(--hero-foam) 0%, var(--hero-glass) 30%, var(--hero-ocean) 50%, var(--hero-depth) 68%, var(--hero-gold) 100%);
+  filter: blur(16px) saturate(1.06);
+}
+
+.shell-header::after,
+.account-panel::after,
+.system-hero::after,
+.market-hero::after {
+  opacity: 0.1;
+  background-image:
+    linear-gradient(0deg, rgba(255, 255, 255, 0.16) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.1) 1px, transparent 1px),
+    repeating-radial-gradient(circle at 42% 44%, rgba(255, 255, 255, 0.2) 0 0.7px, transparent 0.7px 3.4px);
+}
+
+@media (max-width: 760px) {
+  .liquid-nav {
+    justify-content: flex-start;
+  }
+
+  .liquid-nav-track {
+    min-width: max-content;
+  }
+}
+
+/* Route-specific top hero gradients inspired by the reference texture system. */
+.shell-main {
+  --hero-paper: #eef5f4;
+  --hero-mist: #b9d1d5;
+  --hero-cool: #00516d;
+  --hero-depth: #071723;
+  --hero-heat: #ff5c22;
+  --hero-shadow: #3b211c;
+  --hero-light-x: 6%;
+  --hero-light-y: 0%;
+  --hero-mist-x: 17%;
+  --hero-mist-y: 22%;
+  --hero-cool-x: 28%;
+  --hero-cool-y: 78%;
+  --hero-heat-x: 88%;
+  --hero-heat-y: 26%;
+  --hero-depth-x: 72%;
+  --hero-depth-y: 88%;
+}
+
+.route-dashboard {
+  --hero-paper: #edf5f4;
+  --hero-mist: #bed7db;
+  --hero-cool: #00506f;
+  --hero-depth: #061827;
+  --hero-heat: #ff5f2a;
+  --hero-shadow: #4a221c;
+  --hero-cool-x: 27%;
+  --hero-cool-y: 80%;
+  --hero-heat-x: 88%;
+  --hero-heat-y: 27%;
+}
+
+.route-ledger {
+  --hero-paper: #f1f5ec;
+  --hero-mist: #d2dcd2;
+  --hero-cool: #2f4248;
+  --hero-depth: #0a1114;
+  --hero-heat: #dcf458;
+  --hero-shadow: #53651e;
+  --hero-mist-x: 16%;
+  --hero-mist-y: 22%;
+  --hero-cool-x: 27%;
+  --hero-cool-y: 74%;
+  --hero-heat-x: 82%;
+  --hero-heat-y: 25%;
+  --hero-depth-x: 70%;
+  --hero-depth-y: 91%;
+}
+
+.route-strategy {
+  --hero-paper: #eef6f5;
+  --hero-mist: #bbd9dc;
+  --hero-cool: #006386;
+  --hero-depth: #082338;
+  --hero-heat: #ff8f3f;
+  --hero-shadow: #59311f;
+  --hero-cool-x: 25%;
+  --hero-cool-y: 80%;
+  --hero-heat-x: 84%;
+  --hero-heat-y: 30%;
+}
+
+.route-risk {
+  --hero-paper: #f2f0ea;
+  --hero-mist: #c8d4d3;
+  --hero-cool: #586c72;
+  --hero-depth: #182227;
+  --hero-heat: #ef5d49;
+  --hero-shadow: #5b201b;
+  --hero-cool-x: 25%;
+  --hero-cool-y: 76%;
+  --hero-heat-x: 87%;
+  --hero-heat-y: 29%;
+}
+
+.route-execution {
+  --hero-paper: #edf5f4;
+  --hero-mist: #b8d7dc;
+  --hero-cool: #006b91;
+  --hero-depth: #08263b;
+  --hero-heat: #ff7440;
+  --hero-shadow: #57291d;
+  --hero-cool-x: 24%;
+  --hero-cool-y: 78%;
+  --hero-heat-x: 86%;
+  --hero-heat-y: 26%;
+}
+
+.route-market-data {
+  --hero-paper: #eef9f8;
+  --hero-mist: #b9e3df;
+  --hero-cool: #0081a0;
+  --hero-depth: #062439;
+  --hero-heat: #48d3c7;
+  --hero-shadow: #0a4553;
+  --hero-cool-x: 31%;
+  --hero-cool-y: 78%;
+  --hero-heat-x: 84%;
+  --hero-heat-y: 24%;
+}
+
+.route-api {
+  --hero-paper: #eff2ee;
+  --hero-mist: #c8d2d2;
+  --hero-cool: #1a3d52;
+  --hero-depth: #071723;
+  --hero-heat: #4e8bff;
+  --hero-shadow: #101d3b;
+  --hero-cool-x: 27%;
+  --hero-cool-y: 76%;
+  --hero-heat-x: 83%;
+  --hero-heat-y: 24%;
+}
+
+.route-design-system {
+  --hero-paper: #eef4f3;
+  --hero-mist: #bcd5d8;
+  --hero-cool: #004967;
+  --hero-depth: #071723;
+  --hero-heat: #ff5c22;
+  --hero-shadow: #4b241d;
+  --hero-light-x: 7%;
+  --hero-mist-x: 20%;
+  --hero-cool-x: 32%;
+  --hero-cool-y: 77%;
+  --hero-heat-x: 87%;
+  --hero-heat-y: 26%;
+}
+
+.route-settings {
+  --hero-paper: #f3f0e7;
+  --hero-mist: #cbd7cf;
+  --hero-cool: #374f4e;
+  --hero-depth: #131d1d;
+  --hero-heat: #c8aa61;
+  --hero-shadow: #463a1f;
+  --hero-cool-x: 29%;
+  --hero-cool-y: 78%;
+  --hero-heat-x: 84%;
+  --hero-heat-y: 30%;
+}
+
+.shell-header {
+  background:
+    radial-gradient(ellipse 48% 34% at var(--hero-light-x) var(--hero-light-y), rgba(255, 255, 255, 0.98) 0%, rgba(255, 255, 255, 0.7) 19%, transparent 55%),
+    radial-gradient(ellipse 54% 48% at var(--hero-mist-x) var(--hero-mist-y), color-mix(in srgb, var(--hero-mist) 94%, white 6%) 0%, color-mix(in srgb, var(--hero-mist) 78%, transparent) 32%, transparent 66%),
+    radial-gradient(ellipse 64% 74% at var(--hero-cool-x) var(--hero-cool-y), color-mix(in srgb, var(--hero-cool) 100%, white 0%) 0%, color-mix(in srgb, var(--hero-cool) 88%, transparent) 32%, color-mix(in srgb, var(--hero-depth) 76%, transparent) 54%, transparent 80%),
+    radial-gradient(ellipse 62% 66% at var(--hero-heat-x) var(--hero-heat-y), color-mix(in srgb, var(--hero-heat) 100%, white 0%) 0%, color-mix(in srgb, var(--hero-heat) 88%, transparent) 36%, color-mix(in srgb, var(--hero-shadow) 58%, transparent) 62%, transparent 82%),
+    radial-gradient(ellipse 62% 66% at var(--hero-depth-x) var(--hero-depth-y), color-mix(in srgb, var(--hero-depth) 100%, black 0%) 0%, color-mix(in srgb, var(--hero-shadow) 84%, transparent) 42%, transparent 74%),
+    linear-gradient(116deg, var(--hero-paper) 0%, var(--hero-mist) 27%, var(--hero-cool) 48%, var(--hero-depth) 66%, var(--hero-heat) 100%),
+    var(--hero-paper);
+  border-color: color-mix(in srgb, var(--hero-heat) 28%, rgba(255, 255, 255, 0.74));
+}
+
+.shell-header::before {
+  inset: -14%;
+  z-index: 0;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.24), transparent 38%),
+    radial-gradient(circle at 28% 74%, rgba(255, 255, 255, 0.1), transparent 30%),
+    radial-gradient(circle at 84% 20%, color-mix(in srgb, var(--hero-heat) 22%, transparent), transparent 34%);
+  filter: blur(10px) saturate(1.08);
+  opacity: 0.72;
+  transform: scale(1.045);
+}
+
+.shell-header::after {
+  opacity: 0.17;
+  mix-blend-mode: overlay;
+  background-image:
+    linear-gradient(0deg, rgba(255, 255, 255, 0.13) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.09) 1px, transparent 1px),
+    repeating-radial-gradient(circle at 42% 45%, rgba(255, 255, 255, 0.28) 0 0.65px, transparent 0.65px 3.25px),
+    radial-gradient(circle at 82% 18%, color-mix(in srgb, var(--hero-heat) 18%, transparent), transparent 42%);
+  background-size: 52px 52px, 52px 52px, 116px 116px, auto;
+  z-index: 1;
+}

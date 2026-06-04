@@ -966,51 +966,51 @@ function LiquidNav({ currentPath, onNavigate, routes }) {
       className="liquid-nav"
       onMouseLeave={() => setHoveredIndex(null)}
       aria-label="Primary"
+      style={{
+        "--active-index": activeIndex < 0 ? 0 : activeIndex,
+        "--hover-index": magneticIndex < 0 ? 0 : magneticIndex,
+      }}
     >
-      <span
-        className="liquid-nav-blob"
-        style={{
-          "--active-index": activeIndex < 0 ? 0 : activeIndex,
-          "--hover-index": magneticIndex < 0 ? 0 : magneticIndex,
-        }}
-      />
-      {routes.map((route, index) => {
-        const Icon = route.icon;
-        const distance = magneticIndex == null ? 9 : Math.abs(index - magneticIndex);
-        const scale = distance === 0 ? 1.1 : distance === 1 ? 1.04 : 1;
-        const offset =
-          magneticIndex == null || distance > 1
-            ? 0
-            : index < magneticIndex
-              ? 4
-              : index > magneticIndex
-                ? -4
-                : 0;
-        const active = route.path === currentPath;
+      <div className="liquid-nav-track">
+        <span className="liquid-nav-blob" aria-hidden="true" />
+        {routes.map((route, index) => {
+          const Icon = route.icon;
+          const distance = magneticIndex == null ? 9 : Math.abs(index - magneticIndex);
+          const scale = distance === 0 ? 1.1 : distance === 1 ? 1.04 : 1;
+          const offset =
+            magneticIndex == null || distance > 1
+              ? 0
+              : index < magneticIndex
+                ? 4
+                : index > magneticIndex
+                  ? -4
+                  : 0;
+          const active = route.path === currentPath;
 
-        return (
-          <a
-            aria-current={active ? "page" : undefined}
-            aria-label={route.label}
-            className={`liquid-nav-item ${active ? "active" : ""}`}
-            href={route.path}
-            key={route.path}
-            onClick={(event) => {
-              event.preventDefault();
-              onNavigate(route.path);
-            }}
-            onFocus={() => setHoveredIndex(index)}
-            onMouseEnter={() => setHoveredIndex(index)}
-            style={{
-              "--item-offset": `${offset}px`,
-              "--item-scale": scale,
-            }}
-          >
-            <Icon size={19} />
-            <span>{route.label}</span>
-          </a>
-        );
-      })}
+          return (
+            <a
+              aria-current={active ? "page" : undefined}
+              aria-label={route.label}
+              className={`liquid-nav-item ${active ? "active" : ""}`}
+              href={route.path}
+              key={route.path}
+              onClick={(event) => {
+                event.preventDefault();
+                onNavigate(route.path);
+              }}
+              onFocus={() => setHoveredIndex(index)}
+              onMouseEnter={() => setHoveredIndex(index)}
+              style={{
+                "--item-offset": `${offset}px`,
+                "--item-scale": scale,
+              }}
+            >
+              <Icon size={19} />
+              <span>{route.label}</span>
+            </a>
+          );
+        })}
+      </div>
     </nav>
   );
 }
