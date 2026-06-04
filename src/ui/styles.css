@@ -5820,77 +5820,77 @@ h1 {
 
 /* Route-specific top hero gradients inspired by the reference texture system. */
 .shell-main {
-  --hero-paper: #eef5f4;
-  --hero-mist: #b9d1d5;
-  --hero-cool: #00516d;
-  --hero-depth: #071723;
+  --hero-paper: #eef3f2;
+  --hero-mist: #b6cfd4;
+  --hero-cool: #004b69;
+  --hero-depth: #061623;
   --hero-heat: #ff5c22;
-  --hero-shadow: #3b211c;
-  --hero-light-x: 6%;
+  --hero-shadow: #55251d;
+  --hero-light-x: 7%;
   --hero-light-y: 0%;
-  --hero-mist-x: 17%;
-  --hero-mist-y: 22%;
-  --hero-cool-x: 28%;
-  --hero-cool-y: 78%;
+  --hero-mist-x: 18%;
+  --hero-mist-y: 20%;
+  --hero-cool-x: 30%;
+  --hero-cool-y: 79%;
   --hero-heat-x: 88%;
-  --hero-heat-y: 26%;
-  --hero-depth-x: 72%;
-  --hero-depth-y: 88%;
+  --hero-heat-y: 27%;
+  --hero-depth-x: 70%;
+  --hero-depth-y: 90%;
 }
 
 .route-dashboard {
-  --hero-paper: #edf5f4;
-  --hero-mist: #bed7db;
-  --hero-cool: #00506f;
-  --hero-depth: #061827;
-  --hero-heat: #ff5f2a;
-  --hero-shadow: #4a221c;
-  --hero-cool-x: 27%;
+  --hero-paper: #edf4f3;
+  --hero-mist: #b9d1d6;
+  --hero-cool: #004c6c;
+  --hero-depth: #061726;
+  --hero-heat: #ff6128;
+  --hero-shadow: #55251e;
+  --hero-cool-x: 29%;
   --hero-cool-y: 80%;
-  --hero-heat-x: 88%;
+  --hero-heat-x: 87%;
   --hero-heat-y: 27%;
 }
 
 .route-ledger {
-  --hero-paper: #f1f5ec;
-  --hero-mist: #d2dcd2;
-  --hero-cool: #2f4248;
-  --hero-depth: #0a1114;
-  --hero-heat: #dcf458;
-  --hero-shadow: #53651e;
-  --hero-mist-x: 16%;
-  --hero-mist-y: 22%;
-  --hero-cool-x: 27%;
-  --hero-cool-y: 74%;
-  --hero-heat-x: 82%;
-  --hero-heat-y: 25%;
-  --hero-depth-x: 70%;
-  --hero-depth-y: 91%;
+  --hero-paper: #eef3f0;
+  --hero-mist: #b9cfd2;
+  --hero-cool: #00445f;
+  --hero-depth: #06141f;
+  --hero-heat: #ff6429;
+  --hero-shadow: #4d281f;
+  --hero-mist-x: 17%;
+  --hero-mist-y: 21%;
+  --hero-cool-x: 31%;
+  --hero-cool-y: 78%;
+  --hero-heat-x: 88%;
+  --hero-heat-y: 26%;
+  --hero-depth-x: 71%;
+  --hero-depth-y: 90%;
 }
 
 .route-strategy {
   --hero-paper: #eef6f5;
   --hero-mist: #bbd9dc;
-  --hero-cool: #006386;
-  --hero-depth: #082338;
-  --hero-heat: #ff8f3f;
-  --hero-shadow: #59311f;
-  --hero-cool-x: 25%;
+  --hero-cool: #005a7b;
+  --hero-depth: #072238;
+  --hero-heat: #ff8438;
+  --hero-shadow: #5a2d1f;
+  --hero-cool-x: 28%;
   --hero-cool-y: 80%;
-  --hero-heat-x: 84%;
-  --hero-heat-y: 30%;
+  --hero-heat-x: 86%;
+  --hero-heat-y: 28%;
 }
 
 .route-risk {
   --hero-paper: #f2f0ea;
   --hero-mist: #c8d4d3;
-  --hero-cool: #586c72;
-  --hero-depth: #182227;
-  --hero-heat: #ef5d49;
-  --hero-shadow: #5b201b;
-  --hero-cool-x: 25%;
+  --hero-cool: #3f606b;
+  --hero-depth: #111d24;
+  --hero-heat: #f05a43;
+  --hero-shadow: #5a211b;
+  --hero-cool-x: 28%;
   --hero-cool-y: 76%;
-  --hero-heat-x: 87%;
+  --hero-heat-x: 88%;
   --hero-heat-y: 29%;
 }
 
@@ -5910,10 +5910,10 @@ h1 {
 .route-market-data {
   --hero-paper: #eef9f8;
   --hero-mist: #b9e3df;
-  --hero-cool: #0081a0;
+  --hero-cool: #006c8b;
   --hero-depth: #062439;
-  --hero-heat: #48d3c7;
-  --hero-shadow: #0a4553;
+  --hero-heat: #2fd7c9;
+  --hero-shadow: #0a4252;
   --hero-cool-x: 31%;
   --hero-cool-y: 78%;
   --hero-heat-x: 84%;
@@ -5949,39 +5949,39 @@ h1 {
 }
 
 .route-settings {
-  --hero-paper: #f3f0e7;
-  --hero-mist: #cbd7cf;
-  --hero-cool: #374f4e;
-  --hero-depth: #131d1d;
-  --hero-heat: #c8aa61;
-  --hero-shadow: #463a1f;
-  --hero-cool-x: 29%;
+  --hero-paper: #f1efe6;
+  --hero-mist: #c7d4cc;
+  --hero-cool: #294a4e;
+  --hero-depth: #101b1d;
+  --hero-heat: #d3a95a;
+  --hero-shadow: #4b361d;
+  --hero-cool-x: 30%;
   --hero-cool-y: 78%;
-  --hero-heat-x: 84%;
-  --hero-heat-y: 30%;
+  --hero-heat-x: 85%;
+  --hero-heat-y: 29%;
 }
 
 .shell-header {
   background:
-    radial-gradient(ellipse 48% 34% at var(--hero-light-x) var(--hero-light-y), rgba(255, 255, 255, 0.98) 0%, rgba(255, 255, 255, 0.7) 19%, transparent 55%),
-    radial-gradient(ellipse 54% 48% at var(--hero-mist-x) var(--hero-mist-y), color-mix(in srgb, var(--hero-mist) 94%, white 6%) 0%, color-mix(in srgb, var(--hero-mist) 78%, transparent) 32%, transparent 66%),
-    radial-gradient(ellipse 64% 74% at var(--hero-cool-x) var(--hero-cool-y), color-mix(in srgb, var(--hero-cool) 100%, white 0%) 0%, color-mix(in srgb, var(--hero-cool) 88%, transparent) 32%, color-mix(in srgb, var(--hero-depth) 76%, transparent) 54%, transparent 80%),
-    radial-gradient(ellipse 62% 66% at var(--hero-heat-x) var(--hero-heat-y), color-mix(in srgb, var(--hero-heat) 100%, white 0%) 0%, color-mix(in srgb, var(--hero-heat) 88%, transparent) 36%, color-mix(in srgb, var(--hero-shadow) 58%, transparent) 62%, transparent 82%),
-    radial-gradient(ellipse 62% 66% at var(--hero-depth-x) var(--hero-depth-y), color-mix(in srgb, var(--hero-depth) 100%, black 0%) 0%, color-mix(in srgb, var(--hero-shadow) 84%, transparent) 42%, transparent 74%),
-    linear-gradient(116deg, var(--hero-paper) 0%, var(--hero-mist) 27%, var(--hero-cool) 48%, var(--hero-depth) 66%, var(--hero-heat) 100%),
-    var(--hero-paper);
-  border-color: color-mix(in srgb, var(--hero-heat) 28%, rgba(255, 255, 255, 0.74));
+    radial-gradient(ellipse 54% 38% at var(--hero-light-x) var(--hero-light-y), rgba(255, 255, 255, 0.98) 0%, rgba(239, 247, 245, 0.78) 20%, rgba(239, 247, 245, 0.24) 44%, transparent 62%),
+    radial-gradient(ellipse 64% 56% at var(--hero-mist-x) var(--hero-mist-y), color-mix(in srgb, var(--hero-mist) 100%, white 0%) 0%, color-mix(in srgb, var(--hero-mist) 86%, transparent) 36%, transparent 72%),
+    radial-gradient(ellipse 82% 92% at var(--hero-cool-x) var(--hero-cool-y), color-mix(in srgb, var(--hero-cool) 100%, white 0%) 0%, color-mix(in srgb, var(--hero-cool) 96%, transparent) 40%, color-mix(in srgb, var(--hero-depth) 86%, transparent) 66%, transparent 94%),
+    radial-gradient(ellipse 92% 88% at var(--hero-heat-x) var(--hero-heat-y), color-mix(in srgb, var(--hero-heat) 100%, white 0%) 0%, color-mix(in srgb, var(--hero-heat) 96%, transparent) 48%, color-mix(in srgb, var(--hero-shadow) 74%, transparent) 74%, transparent 98%),
+    radial-gradient(ellipse 68% 70% at var(--hero-depth-x) var(--hero-depth-y), color-mix(in srgb, var(--hero-depth) 100%, black 0%) 0%, color-mix(in srgb, var(--hero-shadow) 84%, transparent) 46%, transparent 84%),
+    linear-gradient(112deg, var(--hero-paper) 0%, var(--hero-mist) 23%, var(--hero-cool) 45%, var(--hero-depth) 64%, var(--hero-heat) 100%),
+    var(--hero-depth);
+  border-color: color-mix(in srgb, var(--hero-heat) 42%, rgba(255, 255, 255, 0.68));
 }
 
 .shell-header::before {
   inset: -14%;
   z-index: 0;
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.24), transparent 38%),
-    radial-gradient(circle at 28% 74%, rgba(255, 255, 255, 0.1), transparent 30%),
-    radial-gradient(circle at 84% 20%, color-mix(in srgb, var(--hero-heat) 22%, transparent), transparent 34%);
-  filter: blur(10px) saturate(1.08);
-  opacity: 0.72;
+    linear-gradient(180deg, rgba(255, 255, 255, 0.18), transparent 36%),
+    radial-gradient(circle at 26% 76%, rgba(255, 255, 255, 0.1), transparent 28%),
+    radial-gradient(circle at 84% 22%, color-mix(in srgb, var(--hero-heat) 30%, transparent), transparent 36%);
+  filter: blur(8px) saturate(1.18);
+  opacity: 0.68;
   transform: scale(1.045);
 }
 
@@ -5989,10 +5989,10 @@ h1 {
   opacity: 0.17;
   mix-blend-mode: overlay;
   background-image:
-    linear-gradient(0deg, rgba(255, 255, 255, 0.13) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.09) 1px, transparent 1px),
-    repeating-radial-gradient(circle at 42% 45%, rgba(255, 255, 255, 0.28) 0 0.65px, transparent 0.65px 3.25px),
-    radial-gradient(circle at 82% 18%, color-mix(in srgb, var(--hero-heat) 18%, transparent), transparent 42%);
+    linear-gradient(0deg, rgba(255, 255, 255, 0.15) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.1) 1px, transparent 1px),
+    repeating-radial-gradient(circle at 42% 45%, rgba(255, 255, 255, 0.3) 0 0.7px, transparent 0.7px 3.2px),
+    radial-gradient(circle at 82% 18%, color-mix(in srgb, var(--hero-heat) 24%, transparent), transparent 42%);
   background-size: 52px 52px, 52px 52px, 116px 116px, auto;
   z-index: 1;
 }
