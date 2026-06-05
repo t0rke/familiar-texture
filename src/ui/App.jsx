@@ -1366,6 +1366,9 @@ const apiGroups = [
 ];
 
 function ApiDocsPage({ health, settings, status }) {
+  const [tryPath, setTryPath] = useState("/api/settings");
+  const [tryResult, setTryResult] = useState(null);
+  const [tryLoading, setTryLoading] = useState(false);
   const scripts = [
     "npm run dev",
     "npm run build",
@@ -1378,6 +1381,104 @@ function ApiDocsPage({ health, settings, status }) {
     "npm run db:seed",
     "npm run db:studio",
   ];
+  const mcpTools = [
+    "get_accounts",
+    "get_portfolio",
+    "get_equity_positions",
+    "get_equity_quotes",
+    "get_equity_orders",
+    "get_equity_tradability",
+    "review_equity_order",
+    "place_equity_order",
+    "cancel_equity_order",
+    "search",
+  ];
+  const safetyNotes = [
+    ["Secrets", ".env remains machine-only; browser surfaces masked account context only."],
+    ["Review Gate", "Live placement should follow backend order review and explicit operator intent."],
+    ["Kill Switch", "Execution paths must check kill state immediately before sensitive actions."],
+    ["Settings", "Risk, symbol policy, and live-mode changes are validated before persistence."],
+  ];
+  const contractNotes = [
+    [
+      "Read APIs",
+      "Use GET for cached account, ledger, settings, and future database-backed snapshots. These routes should be idempotent and browser-safe.",
+    ],
+    [
+      "Write APIs",
+      "PATCH/POST routes validate payloads, write atomically where practical, and add audit events for state changes.",
+    ],
+    [
+      "Trading APIs",
+      "Execution routes are not documentation toys. They stay outside the route lab and must be tested through guarded flows.",
+    ],
+    [
+      "Redaction",
+      "Responses must prefer derived status, masked account identifiers, and config health over raw broker or machine secrets.",
+    ],
+  ];
+  const tryRoutes = apiGroups
+    .flatMap((group) =>
+      group.endpoints.map(([method, path, description, badge]) => ({
+        badge,
+        description,
+        group: group.title,
+        method,
+        path,
+      }))
+    )
+    .filter((route) => route.method === "GET");
+  const selectedTryRoute =
+    tryRoutes.find((route) => route.path === tryPath) ?? tryRoutes[0];
+
+  async function runTryRoute() {
+    if (!selectedTryRoute) return;
+
+    setTryLoading(true);
+    setTryResult(null);
+
+    try {
+      const startedAt = performance.now();
+      const response = await fetch(selectedTryRoute.path, {
+        headers: {
+          accept: "application/json",
+        },
+      });
+      const text = await response.text();
+      const elapsed = Math.round(performance.now() - startedAt);
+      let payload = text;
+
+      try {
+        payload = text ? JSON.parse(text) : null;
+      } catch {
+        payload = text;
+      }
+
+      const preview =
+        typeof payload === "string" ? payload : JSON.stringify(payload, null, 2);
+
+      setTryResult({
+        elapsed,
+        ok: response.ok,
+        preview:
+          preview && preview.length > 9000
+            ? `${preview.slice(0, 9000)}\n... response truncated for UI safety`
+            : preview || "No response body",
+        status: response.status,
+        statusText: response.statusText,
+      });
+    } catch (error) {
+      setTryResult({
+        elapsed: 0,
+        ok: false,
+        preview: error.message ?? "Request failed",
+        status: "ERR",
+        statusText: "Request failed",
+      });
+    } finally {
+      setTryLoading(false);
+    }
+  }
 
   return (
     <>
@@ -1385,61 +1486,178 @@ function ApiDocsPage({ health, settings, status }) {
         title="API Console"
         subtitle="Local backend routes, Robinhood MCP tools, scripts, and trading-sensitive boundaries."
       />
-      <section className="api-console two-column-grid">
-        <aside className="endpoint-index">
-          <p className="eyebrow">base url</p>
-          <strong>http://127.0.0.1:5173</strong>
-          <TokenLine label="Database" value={health?.source ?? "database"} />
-          <TokenLine label="MCP" value={status.mcpConfigured ? "Configured" : "Missing"} />
-          <TokenLine label="Strategy" value={settings?.strategy?.activeStrategy ?? "Not loaded"} />
-        </aside>
-        <section className="endpoint-stack">
-          {apiGroups.map((group) => (
-            <article className="endpoint-group" key={group.title}>
-              <div className="section-heading">
-                <span>{group.title}</span>
-                <strong>{group.endpoints.length} endpoints</strong>
+
+      <section className="api-command-center">
+        <div className="api-overview-grid">
+          <article className="api-overview-card primary">
+            <span>Base URL</span>
+            <code>http://127.0.0.1:5173</code>
+            <small>Local Vite/API origin</small>
+          </article>
+          <article className="api-overview-card">
+            <span>Database</span>
+            <strong>{health?.source ?? "database"}</strong>
+            <small>{health?.ok === false ? "Needs attention" : "Config readable"}</small>
+          </article>
+          <article className="api-overview-card">
+            <span>MCP Runtime</span>
+            <strong>{status.mcpConfigured ? "Configured" : "Missing"}</strong>
+            <small>Robinhood adapter availability</small>
+          </article>
+          <article className="api-overview-card">
+            <span>Strategy</span>
+            <strong>{settings?.strategy?.activeStrategy ?? "Not loaded"}</strong>
+            <small>Active server-side profile</small>
+          </article>
+        </div>
+
+        <div className="api-layout">
+          <section className="api-endpoint-map" aria-label="API endpoint map">
+            <div className="api-section-head">
+              <div>
+                <p className="eyebrow">endpoint map</p>
+                <h2>Local routes by operational boundary.</h2>
               </div>
-              {group.endpoints.map(([method, path, description, badge]) => (
-                <EndpointCard
-                  badge={badge}
-                  description={description}
-                  key={`${method}-${path}`}
-                  method={method}
-                  path={path}
-                />
+              <span>{apiGroups.reduce((count, group) => count + group.endpoints.length, 0)} routes</span>
+            </div>
+
+            <div className="api-group-list">
+              {apiGroups.map((group, groupIndex) => (
+                <article className="api-group" key={group.title}>
+                  <header>
+                    <span>{String(groupIndex + 1).padStart(2, "0")}</span>
+                    <div>
+                      <h3>{group.title}</h3>
+                      <small>{group.endpoints.length} endpoints</small>
+                    </div>
+                  </header>
+                  <div className="api-endpoint-list">
+                    {group.endpoints.map(([method, path, description, badge]) => (
+                      <EndpointCard
+                        badge={badge}
+                        description={description}
+                        key={`${method}-${path}`}
+                        method={method}
+                        path={path}
+                      />
+                    ))}
+                  </div>
+                </article>
               ))}
-            </article>
-          ))}
+            </div>
+          </section>
+
+          <aside className="api-side-stack">
+            <section className="api-safety-panel">
+              <div className="section-heading">
+                <span>safety boundaries</span>
+                <strong>Backend first</strong>
+              </div>
+              <div className="api-safety-list">
+                {safetyNotes.map(([label, detail]) => (
+                  <div className="api-safety-row" key={label}>
+                    <ShieldCheck size={16} />
+                    <div>
+                      <strong>{label}</strong>
+                      <p>{detail}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            <section className="api-tool-panel">
+              <div className="section-heading">
+                <span>MCP tools</span>
+                <strong>Robinhood adapter</strong>
+              </div>
+              <div className="api-tool-grid">
+                {mcpTools.map((tool) => (
+                  <span className="system-chip" key={tool}>{tool}</span>
+                ))}
+              </div>
+            </section>
+          </aside>
+        </div>
+
+        <section className="api-lab-layout">
+          <section className="api-try-panel">
+            <div className="api-section-head compact">
+              <div>
+                <p className="eyebrow">route lab</p>
+                <h2>Try read-only routes safely.</h2>
+                <p>
+                  Mutating and trading-sensitive routes are intentionally excluded here. Use this
+                  panel for browser-safe inspection of local JSON responses.
+                </p>
+              </div>
+              <span>GET only</span>
+            </div>
+            <div className="api-try-controls">
+              <label className="select-setting api-route-select">
+                <span>Route</span>
+                <select
+                  data-testid="api-try-select"
+                  value={selectedTryRoute?.path ?? ""}
+                  onChange={(event) => setTryPath(event.target.value)}
+                >
+                  {tryRoutes.map((route) => (
+                    <option key={route.path} value={route.path}>
+                      {route.path} - {route.group}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <button
+                className="primary-button light api-run-button"
+                data-testid="api-try-run"
+                disabled={tryLoading || !selectedTryRoute}
+                onClick={runTryRoute}
+              >
+                {tryLoading ? <RefreshCw className="spin" size={16} /> : <Play size={16} />}
+                <span>{tryLoading ? "Running" : "Run request"}</span>
+              </button>
+              <span
+                className={`api-try-status ${
+                  tryResult?.ok ? "success" : tryResult ? "danger" : ""
+                }`}
+              >
+                {tryResult
+                  ? `${tryResult.status} ${tryResult.statusText} / ${tryResult.elapsed}ms`
+                  : "Awaiting request"}
+              </span>
+            </div>
+            <pre className="api-response-block" data-testid="api-try-result">
+              {tryResult?.preview ??
+                `Select a read-only endpoint and run it.\n\nCurrent route: ${
+                  selectedTryRoute?.path ?? "None"
+                }`}
+            </pre>
+          </section>
+
+          <section className="api-contract-panel">
+            <div className="section-heading">
+              <span>contract model</span>
+              <strong>How route families should behave</strong>
+            </div>
+            <div className="api-contract-grid">
+              {contractNotes.map(([title, detail]) => (
+                <article className="api-contract-card" key={title}>
+                  <Code2 size={17} />
+                  <div>
+                    <strong>{title}</strong>
+                    <p>{detail}</p>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </section>
         </section>
-      </section>
-      <section className="docs-grid two-column-grid">
-        <section className="section-card docs-panel">
-          <div className="section-heading">
-            <span>MCP tools</span>
-            <strong>Robinhood adapter</strong>
-          </div>
-          <div className="chip-gallery">
-            {[
-              "get_accounts",
-              "get_portfolio",
-              "get_equity_positions",
-              "get_equity_quotes",
-              "get_equity_orders",
-              "get_equity_tradability",
-              "review_equity_order",
-              "place_equity_order",
-              "cancel_equity_order",
-              "search",
-            ].map((tool) => (
-              <span className="system-chip" key={tool}>{tool}</span>
-            ))}
-          </div>
-        </section>
-        <section className="section-card dark-doc-panel">
+
+        <section className="api-command-panel">
           <div className="section-heading">
             <span>developer scripts</span>
-            <strong>local commands</strong>
+            <strong>Local commands</strong>
           </div>
           <pre className="code-block">{scripts.join("\n")}</pre>
         </section>
@@ -1456,7 +1674,7 @@ const colorTokens = [
   ["Cloud Blue", "--color-cloud-blue", "#bfd4d6", "Cool glass highlights and chart fills"],
   ["Deep Blue", "--color-deep-blue", "#004967", "Research, confidence, and hero depth"],
   ["Midnight", "--color-midnight", "#071723", "Dark control surfaces and code panels"],
-  ["Execution Blue", "--color-info", "#0066ff", "Active controls and technical emphasis"],
+  ["Control Blue", "--color-info", "#004967", "Active controls and technical emphasis"],
   ["Thermal", "--color-thermal", "#ff5c22", "Energy, execution pressure, and hero warmth"],
   ["Growth Green", "--color-success", "#22c55e", "Pass states, allowed trading, and gains"],
 ];
@@ -1477,7 +1695,7 @@ const pageStandards = [
 ];
 
 const componentStandards = [
-  ["Buttons", "12px radius, icon-first commands, blue for primary, white for neutral, red for danger."],
+  ["Buttons", "12px radius, icon-first commands, deep blue for primary, white for neutral, red for danger."],
   ["Cards", "12-18px radius, white glass, thin hairline, small shadow only when hierarchy needs it."],
   ["Inputs", "42px minimum height, frosted white fill, clear focus ring, no decorative labels."],
   ["Badges", "Functional status chips with dot, short copy, and strict color semantics."],
@@ -1486,11 +1704,76 @@ const componentStandards = [
 ];
 
 const stateStandards = [
-  ["Info", "Execution Blue", "Technical emphasis, active tabs, safe links"],
+  ["Info", "Control Blue", "Technical emphasis, active tabs, safe links"],
   ["Success", "Growth Green", "Allowed symbols, clear kill switch, passing validation"],
   ["Warning", "Amber", "Review needed, stale data, dry-run-only uncertainty"],
   ["Danger", "Red", "Live trading, kill switch, destructive settings"],
   ["Disabled", "Muted", "Unavailable, unconfigured, or blocked controls"],
+];
+
+const routeAnatomy = [
+  [
+    "1",
+    "Hero Texture",
+    "Each route starts with its own atmospheric gradient: same geometry, different color story, strong contrast, and balanced text spacing.",
+  ],
+  [
+    "2",
+    "Glass Status",
+    "Safety status sits inside a compact glass control cluster when it is relevant to operator confidence.",
+  ],
+  [
+    "3",
+    "Content Lead",
+    "Below the hero, a plain white content lead names the page job in direct language before dense tools begin.",
+  ],
+  [
+    "4",
+    "Work Surface",
+    "Operational content uses reusable panels, section headings, compact lists, and predictable form primitives.",
+  ],
+];
+
+const apiStandards = [
+  [
+    "Endpoint cards",
+    "Method, route, intent, and boundary badge must remain aligned and readable at desktop and mobile sizes.",
+  ],
+  [
+    "Route lab",
+    "Only browser-safe GET routes are runnable in documentation. POST/PATCH stay behind purpose-built flows.",
+  ],
+  [
+    "Response preview",
+    "Show status, timing, and formatted JSON, truncating large payloads to protect layout performance.",
+  ],
+  [
+    "Safety copy",
+    "Use direct operational language: what is safe, what mutates state, and what requires backend enforcement.",
+  ],
+];
+
+const qualityChecklist = [
+  [
+    "Hero spacing",
+    "Title, eyebrow, subtitle, toolbar, and tabs never collide; line-height stays calm and cinematic.",
+  ],
+  [
+    "Theme cohesion",
+    "Use page-specific gradients on heroes, but shared cards, buttons, forms, and badges everywhere else.",
+  ],
+  [
+    "Keyboard path",
+    "Every route control is reachable, focused controls are visible, and icon-only actions have labels.",
+  ],
+  [
+    "Mobile resilience",
+    "No horizontal overflow, no cut-off card text, and no layout shift from tabs or nav bubbles.",
+  ],
+  [
+    "Safety meaning",
+    "Green is pass/growth, red is danger/live/destructive, amber is review/stale, blue is technical control.",
+  ],
 ];
 
 function DesignSystemPage() {
@@ -1545,7 +1828,7 @@ function DesignSystemPage() {
           {[
             ["Dashboard / Core", "Trust + intelligence + warmth", ["#004967", "#bfd4d6", "#ff5c22", "#f7f7f4", "#111418"]],
             ["Portfolio / Growth", "Positive capital and allocation", ["#0b4c8c", "#c6e6e0", "#22c55e", "#e7faf1", "#182620"]],
-            ["Research / Analysis", "Ideas, signals, and evidence", ["#3647b7", "#a5b4fc", "#7c3aed", "#f1edff", "#1f2141"]],
+            ["Research / Analysis", "Ideas, signals, and evidence", ["#004967", "#bfd4d6", "#071723", "#eef4f3", "#1f2528"]],
             ["Risk / Execution", "Warnings and irreversible actions", ["#071723", "#ef4444", "#ffb020", "#fff7e7", "#f7f7f4"]],
           ].map(([name, note, colors]) => (
             <div className="theme-row" key={name}>
@@ -1708,6 +1991,54 @@ function DesignSystemPage() {
               <li>Let mobile text overlap or resize component geometry.</li>
             </ul>
           </article>
+        </div>
+      </DesignSection>
+
+      <DesignSection
+        number="8"
+        title="Route Anatomy"
+        note="Use this sequence on every page so the product feels varied but never improvised."
+      >
+        <div className="design-anatomy-grid">
+          {routeAnatomy.map(([number, title, detail]) => (
+            <article className="design-anatomy-card" key={title}>
+              <span>{number}</span>
+              <div>
+                <strong>{title}</strong>
+                <p>{detail}</p>
+              </div>
+            </article>
+          ))}
+        </div>
+      </DesignSection>
+
+      <DesignSection
+        number="9"
+        title="API & Data Surfaces"
+        note="API documentation is part of the product, so it gets the same clarity, density, and safety posture as trading screens."
+      >
+        <div className="design-rule-grid">
+          {apiStandards.map(([title, detail]) => (
+            <SpecCard key={title} title={title} value={title} detail={detail} tone="info" />
+          ))}
+        </div>
+      </DesignSection>
+
+      <DesignSection
+        number="10"
+        title="Final QA Checklist"
+        note="These checks prevent visual drift as new features are added."
+      >
+        <div className="design-checklist-grid">
+          {qualityChecklist.map(([title, detail]) => (
+            <article className="design-check-card" key={title}>
+              <CheckCircle2 size={18} />
+              <div>
+                <strong>{title}</strong>
+                <p>{detail}</p>
+              </div>
+            </article>
+          ))}
         </div>
       </DesignSection>
     </>
