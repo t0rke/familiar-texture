@@ -2333,7 +2333,7 @@ function StrategyControlCenter({
             <MiniStat label="MCP" value={status.mcpConfigured ? "Configured" : "Missing"} />
           </div>
           <button
-            className={`kill-button ${status.killSwitchActive ? "armed" : ""}`}
+            className={`kill-button execution-kill-button ${status.killSwitchActive ? "armed" : ""}`}
             onClick={() => onKillSwitch(!status.killSwitchActive)}
           >
             <ShieldAlert size={16} />
